@@ -1,31 +1,33 @@
 export const API_KEY = process.env.VNSTOCK_API_KEY;
 
-export const BASE_URL =
-  process.env.VNSTOCK_BASE_URL || "https://api.vnstock.vn";
+/**
+ * Chỉ dùng 1 GitHub Secret: VNSTOCK_API_KEY
+ *
+ * Nếu sau này bạn có endpoint chính xác của VNStock, chỉ cần sửa tại đây.
+ * Không cần thêm secret mới.
+ */
+export const VNSTOCK_ENDPOINTS = {
+  /**
+   * Endpoint mặc định đang để theo dạng API giả định.
+   * Nếu VNStock cung cấp URL khác, sửa dòng này.
+   */
+  ohlcv: "https://api.vnstock.vn/ohlcv"
+};
 
-export const OHLCV_URL =
-  process.env.VNSTOCK_OHLCV_URL || "";
-
-export const SYMBOLS = (
-  process.env.SYMBOLS ||
-  [
-    "VIC", "VHM", "VRE",
-    "FPT", "MWG", "DGW", "FOX",
-    "HPG", "HSG", "NKG",
-    "SSI", "HCM", "VCI", "VND", "SHS",
-    "BID", "CTG", "VCB", "TCB", "MBB", "ACB", "STB", "VPB", "HDB",
-    "PVD", "PVS", "GAS", "BSR", "PLX",
-    "GEX", "REE", "PC1", "HDG",
-    "KBC", "IDC", "SZC", "BCM",
-    "VNM", "MSN", "SAB",
-    "GMD", "HAH", "VSC",
-    "DGC", "CSV", "DDV",
-    "CTR", "CMG", "ELC"
-  ].join(",")
-)
-  .split(",")
-  .map(x => x.trim())
-  .filter(Boolean);
+export const SYMBOLS = [
+  "VIC", "VHM", "VRE",
+  "FPT", "MWG", "DGW", "FOX",
+  "HPG", "HSG", "NKG",
+  "SSI", "HCM", "VCI", "VND", "SHS",
+  "BID", "CTG", "VCB", "TCB", "MBB", "ACB", "STB", "VPB", "HDB",
+  "PVD", "PVS", "GAS", "BSR", "PLX",
+  "GEX", "REE", "PC1", "HDG",
+  "KBC", "IDC", "SZC", "BCM",
+  "VNM", "MSN", "SAB",
+  "GMD", "HAH", "VSC",
+  "DGC", "CSV", "DDV",
+  "CTR", "CMG", "ELC"
+];
 
 export const COMPANY_INFO = {
   VIC: { name: "Tập đoàn Vingroup", industry: "Bất động sản / Holding" },
@@ -66,6 +68,11 @@ export const COMPANY_INFO = {
   BSR: { name: "Lọc hóa dầu Bình Sơn", industry: "Dầu khí" },
   PLX: { name: "Petrolimex", industry: "Dầu khí" },
 
+  GEX: { name: "Gelex", industry: "Công nghiệp" },
+  REE: { name: "REE Corp", industry: "Điện / Cơ điện lạnh" },
+  PC1: { name: "PC1 Group", industry: "Xây lắp điện" },
+  HDG: { name: "Hà Đô", industry: "Bất động sản / Năng lượng" },
+
   KBC: { name: "Kinh Bắc", industry: "Bất động sản KCN" },
   IDC: { name: "IDICO", industry: "Bất động sản KCN" },
   SZC: { name: "Sonadezi Châu Đức", industry: "Bất động sản KCN" },
@@ -81,5 +88,7 @@ export const COMPANY_INFO = {
 
   DGC: { name: "Hóa chất Đức Giang", industry: "Hóa chất" },
   CSV: { name: "Hóa chất Cơ bản Miền Nam", industry: "Hóa chất" },
-  DDV: { name: "DAP Vinachem", industry: "Hóa chất" }
+  DDV: { name: "DAP Vinachem", industry: "Hóa chất" },
+
+  CTR: { name: "Viettel Construction", industry: "Viễn thông / Hạ tầng" }
 };
