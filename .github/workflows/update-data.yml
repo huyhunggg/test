@@ -1,0 +1,41 @@
+name: Update Stock Radar Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run scanner
+        env:
+          VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
+          VNSTOCK_BASE_URL: ${{ secrets.VNSTOCK_BASE_URL }}
+          VNSTOCK_OHLCV_URL: ${{ secrets.VNSTOCK_OHLCV_URL }}
+          SYMBOLS: ${{ secrets.SYMBOLS }}
+        run: npm run scan
+
+      - name: Commit updated data
+        run: |
+          git config user.name "stock-radar-bot"
+          git config user.email "stock-radar-bot@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "Update stock radar data"
+          git push
