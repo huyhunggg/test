@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-16T08:17:19.326246Z",
+  "updatedAt": "2026-07-16T09:47:56.097005Z",
   "count": 403,
   "data": [
     {
@@ -5186,7 +5186,7 @@
       "name": "AAA",
       "industry": "Chưa phân ngành",
       "price": 7.2,
-      "volume": 606900.0,
+      "volume": 617300.0,
       "rsi": 40.86,
       "macd": 0.0011,
       "macdSignal": 0.0359,
@@ -5197,8 +5197,8 @@
       "change5": -1.5,
       "change20": -2.44,
       "change60": 2.27,
-      "volumeRatio20": 0.69,
-      "volumeRatio50": 0.71,
+      "volumeRatio20": 0.7,
+      "volumeRatio50": 0.73,
       "rs20": 0.0,
       "rs60": 0.0,
       "score": 27,
@@ -6267,7 +6267,7 @@
       "name": "HBC",
       "industry": "Chưa phân ngành",
       "price": 4.7,
-      "volume": 1162800.0,
+      "volume": 1164000.0,
       "rsi": 20.0,
       "macd": -0.0644,
       "macdSignal": -0.0518,
@@ -6278,7 +6278,7 @@
       "change5": -2.08,
       "change20": -6.0,
       "change60": -7.84,
-      "volumeRatio20": 1.85,
+      "volumeRatio20": 1.86,
       "volumeRatio50": 1.57,
       "rs20": 0.0,
       "rs60": 0.0,
@@ -6300,7 +6300,7 @@
         "Tất cả mã"
       ],
       "positives": [
-        "Volume đạt 1.85 lần trung bình 20 phiên.",
+        "Volume đạt 1.86 lần trung bình 20 phiên.",
         "Có dấu hiệu volume cạn trước đó rồi bùng lên."
       ],
       "risks": [
@@ -8088,7 +8088,7 @@
       "name": "C4G",
       "industry": "Chưa phân ngành",
       "price": 6.4,
-      "volume": 399800.0,
+      "volume": 400300.0,
       "rsi": 42.86,
       "macd": -0.0906,
       "macdSignal": -0.0807,
@@ -10422,7 +10422,7 @@
       "name": "HNG",
       "industry": "Chưa phân ngành",
       "price": 6.9,
-      "volume": 1229400.0,
+      "volume": 1243000.0,
       "rsi": 42.86,
       "macd": -0.0204,
       "macdSignal": -0.0059,
@@ -10433,8 +10433,8 @@
       "change5": -1.43,
       "change20": -1.43,
       "change60": 4.55,
-      "volumeRatio20": 0.55,
-      "volumeRatio50": 0.38,
+      "volumeRatio20": 0.56,
+      "volumeRatio50": 0.39,
       "rs20": 0.0,
       "rs60": 0.0,
       "score": 15,
