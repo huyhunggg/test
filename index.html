@@ -32,16 +32,16 @@
     }
 
     .app {
-      padding: 24px;
+      padding: 16px;
     }
 
     .header {
       background: rgba(255, 255, 255, 0.96);
-      border-radius: 28px;
+      border-radius: 24px;
       padding: 18px;
       box-shadow: var(--shadow);
       position: sticky;
-      top: 16px;
+      top: 12px;
       z-index: 10;
     }
 
@@ -75,7 +75,7 @@
       border: 1px solid var(--border);
       background: white;
       border-radius: 999px;
-      padding: 12px 18px;
+      padding: 11px 16px;
       font-weight: 800;
       cursor: pointer;
       white-space: nowrap;
@@ -95,34 +95,35 @@
     input,
     select {
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 15px;
-      font-size: 15px;
+      border-radius: 14px;
+      padding: 13px;
+      font-size: 14px;
       width: 100%;
       background: white;
     }
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.85fr);
+      grid-template-columns: minmax(0, 1.05fr) minmax(420px, 0.95fr);
       gap: 24px;
       margin-top: 24px;
     }
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(2, minmax(280px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(2, minmax(240px, 1fr));
+      gap: 16px;
+      align-content: start;
     }
 
     .card {
       background: var(--card);
-      border-radius: 26px;
-      padding: 24px;
+      border-radius: 22px;
+      padding: 16px;
       box-shadow: var(--shadow);
       cursor: pointer;
       border: 1px solid transparent;
-      min-height: 390px;
+      min-height: 230px;
     }
 
     .card.active {
@@ -132,31 +133,34 @@
     .head {
       display: flex;
       justify-content: space-between;
-      gap: 16px;
+      gap: 12px;
     }
 
     .symbol {
-      font-size: 44px;
+      font-size: 32px;
       margin: 0;
       letter-spacing: -0.08em;
       font-weight: 950;
+      line-height: 1;
     }
 
     .company {
       color: var(--muted);
-      margin-top: 8px;
-      line-height: 1.4;
+      margin-top: 6px;
+      line-height: 1.35;
+      font-size: 13px;
     }
 
     .badge {
       background: #dcffe8;
       color: #047857;
-      padding: 9px 14px;
+      padding: 7px 11px;
       border-radius: 999px;
       font-weight: 900;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       white-space: nowrap;
       text-align: center;
+      font-size: 13px;
     }
 
     .badge.vic {
@@ -165,11 +169,11 @@
     }
 
     .bar {
-      height: 9px;
+      height: 7px;
       background: #edf2f7;
       border-radius: 999px;
       overflow: hidden;
-      margin: 18px 0;
+      margin: 12px 0;
     }
 
     .bar span {
@@ -180,26 +184,26 @@
 
     .action {
       font-weight: 950;
-      font-size: 20px;
-      margin-bottom: 12px;
+      font-size: 16px;
+      margin-bottom: 8px;
     }
 
     .desc {
       color: #475569;
-      line-height: 1.55;
-      margin-bottom: 16px;
-      font-size: 15px;
+      line-height: 1.45;
+      margin-bottom: 12px;
+      font-size: 13px;
     }
 
     .metrics,
     .scores {
       display: grid;
-      gap: 10px;
+      gap: 8px;
     }
 
     .metrics {
       grid-template-columns: repeat(4, 1fr);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .scores {
@@ -208,35 +212,36 @@
 
     .box {
       background: var(--blue-bg);
-      padding: 12px;
-      border-radius: 16px;
-      min-height: 62px;
+      padding: 9px;
+      border-radius: 14px;
+      min-height: 50px;
     }
 
     .label {
       color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 6px;
+      font-size: 11px;
+      margin-bottom: 4px;
     }
 
     .value {
       font-weight: 900;
+      font-size: 13px;
     }
 
     .tags {
-      margin-top: 16px;
+      margin-top: 10px;
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 7px;
     }
 
     .tag {
       background: #f8fafc;
       border: 1px solid #edf2f7;
-      padding: 7px 11px;
+      padding: 5px 8px;
       border-radius: 999px;
       color: #475569;
-      font-size: 13px;
+      font-size: 11px;
     }
 
     .tag.hot {
@@ -250,16 +255,17 @@
       padding: 28px;
       box-shadow: var(--shadow);
       position: sticky;
-      top: 180px;
-      max-height: calc(100vh - 200px);
+      top: 170px;
+      max-height: calc(100vh - 190px);
       overflow: auto;
     }
 
     .detail-symbol {
-      font-size: 56px;
+      font-size: 58px;
       font-weight: 950;
       letter-spacing: -0.08em;
       margin: 0;
+      line-height: 1;
     }
 
     .section {
@@ -315,7 +321,7 @@
 
     @media (max-width: 760px) {
       .app {
-        padding: 12px;
+        padding: 10px;
       }
 
       .filters {
@@ -340,7 +346,7 @@
         <div>
           <h1>VN Stock Radar</h1>
           <div class="subtitle">
-            Quét cổ phiếu theo Breakout, Pullback, Dòng tiền, MACD, RSI và mẫu “Bước nhảy VIC”
+            Quét cổ phiếu theo T+, Breakout, Pullback, Dòng tiền, MACD, RSI và mẫu “Bước nhảy VIC”
           </div>
         </div>
 
@@ -374,10 +380,10 @@
 
         <select id="sort">
           <option value="score">Điểm cao nhất</option>
+          <option value="tplus">T+ cao nhất</option>
           <option value="vicLeap">Bước nhảy VIC</option>
           <option value="money">Dòng tiền mạnh</option>
           <option value="change20">Tăng 20 phiên</option>
-          <option value="rs20">Mạnh hơn VNINDEX</option>
         </select>
       </div>
     </section>
@@ -391,6 +397,7 @@
   <script>
     const tabs = [
       "Top cơ hội",
+      "Lướt sóng T+",
       "Bước nhảy VIC",
       "Breakout 20 phiên",
       "Breakout 60 phiên",
@@ -406,12 +413,20 @@
     ];
 
     let stocks = [];
-    let activeTab = "Bước nhảy VIC";
+    let activeTab = "Lướt sóng T+";
     let selectedSymbol = null;
 
     function formatNumber(n, digits = 2) {
       if (n === null || n === undefined || Number.isNaN(Number(n))) return "-";
       return Number(n).toLocaleString("vi-VN", { maximumFractionDigits: digits });
+    }
+
+    function getTplus(s) {
+      return Number(s.scoreParts?.tplus || s.tplusScore || 0);
+    }
+
+    function getVic(s) {
+      return Number(s.scoreParts?.vicLeap || 0);
     }
 
     function renderTabs() {
@@ -463,10 +478,10 @@
 
       data.sort((a, b) => {
         if (sort === "score") return Number(b.score || 0) - Number(a.score || 0);
-        if (sort === "vicLeap") return Number(b.scoreParts?.vicLeap || 0) - Number(a.scoreParts?.vicLeap || 0);
+        if (sort === "tplus") return getTplus(b) - getTplus(a);
+        if (sort === "vicLeap") return getVic(b) - getVic(a);
         if (sort === "money") return Number(b.scoreParts?.money || 0) - Number(a.scoreParts?.money || 0);
         if (sort === "change20") return Number(b.change20 || 0) - Number(a.change20 || 0);
-        if (sort === "rs20") return Number(b.rs20 || 0) - Number(a.rs20 || 0);
         return Number(b.score || 0) - Number(a.score || 0);
       });
 
@@ -489,7 +504,8 @@
 
       cards.innerHTML = data.map(s => {
         const score = Number(s.score || 0);
-        const vicScore = Number(s.scoreParts?.vicLeap || 0);
+        const vicScore = getVic(s);
+        const tplusScore = getTplus(s);
 
         return `
           <article class="card ${s.symbol === selectedSymbol ? "active" : ""}" onclick="selectStock('${s.symbol}')">
@@ -498,9 +514,10 @@
                 <h2 class="symbol">${s.symbol}</h2>
                 <div class="company">${s.name || s.symbol} · ${s.industry || "Chưa phân ngành"}</div>
               </div>
+
               <div>
                 <div class="badge">${score}/100</div>
-                <div class="badge vic">VIC ${vicScore}/15</div>
+                <div class="badge vic">T+ ${tplusScore}/15</div>
               </div>
             </div>
 
@@ -509,31 +526,38 @@
             <div class="action">${s.action || "THEO DÕI"}</div>
 
             <div class="desc">
-              <b>Setup:</b> ${s.setup || "Theo dõi"}.
-              Giá ${formatNumber(s.price)}, RSI ${formatNumber(s.rsi)},
-              20 phiên ${formatNumber(s.change20)}%,
-              Vol ${formatNumber(s.volumeRatio20)}x TB20.
+              <b>${s.setup || "Theo dõi"}</b> ·
+              Giá ${formatNumber(s.price)} ·
+              RSI ${formatNumber(s.rsi)} ·
+              20 phiên ${formatNumber(s.change20)}% ·
+              Vol ${formatNumber(s.volumeRatio20)}x
             </div>
 
             <div class="metrics">
-              <div class="box"><div class="label">Giá</div><div class="value">${formatNumber(s.price)}</div></div>
-              <div class="box"><div class="label">RSI</div><div class="value">${formatNumber(s.rsi)}</div></div>
-              <div class="box"><div class="label">20 phiên</div><div class="value">${formatNumber(s.change20)}%</div></div>
-              <div class="box"><div class="label">Vol</div><div class="value">${formatNumber(s.volumeRatio20)}x</div></div>
-            </div>
+              <div class="box">
+                <div class="label">Giá</div>
+                <div class="value">${formatNumber(s.price)}</div>
+              </div>
 
-            <div class="scores">
-              <div class="box"><div class="label">Trend</div><div class="value">${s.scoreParts?.trend ?? "-"}</div></div>
-              <div class="box"><div class="label">Mom</div><div class="value">${s.scoreParts?.momentum ?? "-"}</div></div>
-              <div class="box"><div class="label">Money</div><div class="value">${s.scoreParts?.money ?? "-"}</div></div>
-              <div class="box"><div class="label">Setup</div><div class="value">${s.scoreParts?.setup ?? "-"}</div></div>
-              <div class="box"><div class="label">VIC Leap</div><div class="value">${s.scoreParts?.vicLeap ?? "-"}</div></div>
-              <div class="box"><div class="label">Risk</div><div class="value">${s.scoreParts?.risk ?? "-"}</div></div>
+              <div class="box">
+                <div class="label">RSI</div>
+                <div class="value">${formatNumber(s.rsi)}</div>
+              </div>
+
+              <div class="box">
+                <div class="label">T+</div>
+                <div class="value">${tplusScore}/15</div>
+              </div>
+
+              <div class="box">
+                <div class="label">VIC</div>
+                <div class="value">${vicScore}/15</div>
+              </div>
             </div>
 
             <div class="tags">
-              ${(s.categories || []).slice(0, 5).map(c => `
-                <span class="tag ${c === "Bước nhảy VIC" || c === "Top cơ hội" ? "hot" : ""}">${c}</span>
+              ${(s.categories || []).slice(0, 3).map(c => `
+                <span class="tag ${c === "Bước nhảy VIC" || c === "Top cơ hội" || c === "Lướt sóng T+" ? "hot" : ""}">${c}</span>
               `).join("")}
             </div>
           </article>
@@ -551,13 +575,19 @@
         return;
       }
 
+      const tplusScore = getTplus(s);
+      const vicScore = getVic(s);
+
       detail.innerHTML = `
         <div class="head">
           <div>
             <h2 class="detail-symbol">${s.symbol}</h2>
             <div class="company">${s.name || s.symbol} · ${s.industry || "Chưa phân ngành"}</div>
           </div>
-          <div class="badge">${s.score}/100</div>
+          <div>
+            <div class="badge">${s.score}/100</div>
+            <div class="badge vic">T+ ${tplusScore}/15</div>
+          </div>
         </div>
 
         <div class="bar"><span style="width:${Math.min(s.score, 100)}%"></span></div>
@@ -567,7 +597,21 @@
           <div class="desc">
             <b>${s.action || "THEO DÕI"}</b> · Setup: <b>${s.setup || "Theo dõi"}</b> ·
             Market state: ${s.marketState || "-"}.
-            Điểm VIC Leap: <b>${s.scoreParts?.vicLeap ?? "-"}/15</b>.
+            Điểm VIC Leap: <b>${vicScore}/15</b> ·
+            Điểm T+: <b>${tplusScore}/15</b>.
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Điểm thành phần</h3>
+          <div class="scores">
+            <div class="box"><div class="label">Trend</div><div class="value">${s.scoreParts?.trend ?? "-"}</div></div>
+            <div class="box"><div class="label">Momentum</div><div class="value">${s.scoreParts?.momentum ?? "-"}</div></div>
+            <div class="box"><div class="label">Money</div><div class="value">${s.scoreParts?.money ?? "-"}</div></div>
+            <div class="box"><div class="label">Setup</div><div class="value">${s.scoreParts?.setup ?? "-"}</div></div>
+            <div class="box"><div class="label">VIC Leap</div><div class="value">${vicScore}</div></div>
+            <div class="box"><div class="label">T+</div><div class="value">${tplusScore}</div></div>
+            <div class="box"><div class="label">Risk</div><div class="value">${s.scoreParts?.risk ?? "-"}</div></div>
           </div>
         </div>
 
