@@ -12,114 +12,11 @@ RATE_LIMIT_WAIT_SECONDS = 65
 MAX_RETRIES = 1
 
 
-COMPANY_INFO = {
-    "VIC": {"name": "Tập đoàn Vingroup", "industry": "Bất động sản / Holding"},
-    "VHM": {"name": "Vinhomes", "industry": "Bất động sản"},
-    "VRE": {"name": "Vincom Retail", "industry": "Bất động sản bán lẻ"},
-
-    "FPT": {"name": "FPT Corporation", "industry": "Công nghệ"},
-    "FOX": {"name": "FPT Telecom", "industry": "Công nghệ / Viễn thông"},
-    "CMG": {"name": "CMC Corp", "industry": "Công nghệ"},
-    "ELC": {"name": "ELCOM", "industry": "Công nghệ"},
-    "CTR": {"name": "Viettel Construction", "industry": "Viễn thông / Hạ tầng"},
-
-    "MWG": {"name": "Thế Giới Di Động", "industry": "Bán lẻ"},
-    "DGW": {"name": "Digiworld", "industry": "Bán lẻ / Phân phối"},
-    "FRT": {"name": "FPT Retail", "industry": "Bán lẻ"},
-
-    "HPG": {"name": "Hòa Phát", "industry": "Thép"},
-    "HSG": {"name": "Hoa Sen", "industry": "Thép"},
-    "NKG": {"name": "Nam Kim", "industry": "Thép"},
-
-    "SSI": {"name": "Chứng khoán SSI", "industry": "Chứng khoán"},
-    "HCM": {"name": "Chứng khoán HSC", "industry": "Chứng khoán"},
-    "VCI": {"name": "Chứng khoán Vietcap", "industry": "Chứng khoán"},
-    "VND": {"name": "Chứng khoán VNDirect", "industry": "Chứng khoán"},
-    "SHS": {"name": "Chứng khoán Sài Gòn Hà Nội", "industry": "Chứng khoán"},
-    "MBS": {"name": "Chứng khoán MB", "industry": "Chứng khoán"},
-    "FTS": {"name": "Chứng khoán FPT", "industry": "Chứng khoán"},
-    "BSI": {"name": "Chứng khoán BIDV", "industry": "Chứng khoán"},
-    "CTS": {"name": "Chứng khoán VietinBank", "industry": "Chứng khoán"},
-    "VIX": {"name": "Chứng khoán VIX", "industry": "Chứng khoán"},
-
-    "BID": {"name": "BIDV", "industry": "Ngân hàng"},
-    "CTG": {"name": "VietinBank", "industry": "Ngân hàng"},
-    "VCB": {"name": "Vietcombank", "industry": "Ngân hàng"},
-    "TCB": {"name": "Techcombank", "industry": "Ngân hàng"},
-    "MBB": {"name": "MB Bank", "industry": "Ngân hàng"},
-    "ACB": {"name": "ACB", "industry": "Ngân hàng"},
-    "STB": {"name": "Sacombank", "industry": "Ngân hàng"},
-    "VPB": {"name": "VPBank", "industry": "Ngân hàng"},
-    "HDB": {"name": "HDBank", "industry": "Ngân hàng"},
-    "LPB": {"name": "LPBank", "industry": "Ngân hàng"},
-    "TPB": {"name": "TPBank", "industry": "Ngân hàng"},
-    "EIB": {"name": "Eximbank", "industry": "Ngân hàng"},
-    "OCB": {"name": "OCB", "industry": "Ngân hàng"},
-    "SHB": {"name": "SHB", "industry": "Ngân hàng"},
-    "VIB": {"name": "VIB", "industry": "Ngân hàng"},
-
-    "PVD": {"name": "PV Drilling", "industry": "Dầu khí"},
-    "PVS": {"name": "PVS", "industry": "Dầu khí"},
-    "GAS": {"name": "PV Gas", "industry": "Dầu khí"},
-    "BSR": {"name": "Lọc hóa dầu Bình Sơn", "industry": "Dầu khí"},
-    "PLX": {"name": "Petrolimex", "industry": "Dầu khí"},
-    "PVT": {"name": "PVTrans", "industry": "Dầu khí / Vận tải"},
-
-    "GEX": {"name": "Gelex", "industry": "Công nghiệp"},
-    "REE": {"name": "REE Corp", "industry": "Điện / Cơ điện lạnh"},
-    "PC1": {"name": "PC1 Group", "industry": "Xây lắp điện"},
-    "HDG": {"name": "Hà Đô", "industry": "Bất động sản / Năng lượng"},
-    "POW": {"name": "PV Power", "industry": "Điện"},
-    "NT2": {"name": "Điện Nhơn Trạch 2", "industry": "Điện"},
-    "PPC": {"name": "Nhiệt điện Phả Lại", "industry": "Điện"},
-
-    "KBC": {"name": "Kinh Bắc", "industry": "Bất động sản KCN"},
-    "IDC": {"name": "IDICO", "industry": "Bất động sản KCN"},
-    "SZC": {"name": "Sonadezi Châu Đức", "industry": "Bất động sản KCN"},
-    "BCM": {"name": "Becamex", "industry": "Bất động sản KCN"},
-    "LHG": {"name": "Long Hậu", "industry": "Bất động sản KCN"},
-    "NTC": {"name": "Nam Tân Uyên", "industry": "Bất động sản KCN"},
-
-    "DXG": {"name": "Đất Xanh", "industry": "Bất động sản"},
-    "DIG": {"name": "DIC Corp", "industry": "Bất động sản"},
-    "PDR": {"name": "Phát Đạt", "industry": "Bất động sản"},
-    "NLG": {"name": "Nam Long", "industry": "Bất động sản"},
-    "KDH": {"name": "Khang Điền", "industry": "Bất động sản"},
-    "NVL": {"name": "Novaland", "industry": "Bất động sản"},
-    "CEO": {"name": "CEO Group", "industry": "Bất động sản"},
-
-    "VNM": {"name": "Vinamilk", "industry": "Thực phẩm"},
-    "MSN": {"name": "Masan", "industry": "Tiêu dùng"},
-    "SAB": {"name": "Sabeco", "industry": "Đồ uống"},
-    "MCH": {"name": "Masan Consumer", "industry": "Tiêu dùng"},
-    "QNS": {"name": "Đường Quảng Ngãi", "industry": "Thực phẩm"},
-    "DBC": {"name": "Dabaco", "industry": "Nông nghiệp / Thực phẩm"},
-    "BAF": {"name": "BAF Việt Nam", "industry": "Nông nghiệp / Thực phẩm"},
-
-    "GMD": {"name": "Gemadept", "industry": "Cảng biển / Logistics"},
-    "HAH": {"name": "Hải An", "industry": "Vận tải biển"},
-    "VSC": {"name": "Viconship", "industry": "Cảng biển"},
-    "VTP": {"name": "Viettel Post", "industry": "Logistics"},
-
-    "DGC": {"name": "Hóa chất Đức Giang", "industry": "Hóa chất"},
-    "CSV": {"name": "Hóa chất Cơ bản Miền Nam", "industry": "Hóa chất"},
-    "DDV": {"name": "DAP Vinachem", "industry": "Hóa chất"},
-    "DPM": {"name": "Đạm Phú Mỹ", "industry": "Phân bón"},
-    "DCM": {"name": "Đạm Cà Mau", "industry": "Phân bón"},
-
-    "PNJ": {"name": "Vàng bạc Đá quý Phú Nhuận", "industry": "Bán lẻ / Trang sức"},
-    "VJC": {"name": "Vietjet Air", "industry": "Hàng không"},
-    "HVN": {"name": "Vietnam Airlines", "industry": "Hàng không"},
-    "ACV": {"name": "Cảng hàng không Việt Nam", "industry": "Hạ tầng hàng không"},
-}
-
-
 def load_symbols():
     try:
         with open("symbols.txt", "r", encoding="utf-8") as f:
             raw = f.read()
     except FileNotFoundError:
-        print("symbols.txt not found. Using fallback symbols.")
         return [
             "VIC", "VHM", "VRE", "FPT", "HPG", "HCM",
             "SSI", "VCI", "VND", "BID", "CTG", "MBB",
@@ -130,31 +27,13 @@ def load_symbols():
 
     for line in raw.replace(",", "\n").splitlines():
         s = line.strip().upper()
+        if s and not s.startswith("#"):
+            symbols.append(s)
 
-        if not s:
-            continue
-
-        if s.startswith("#"):
-            continue
-
-        symbols.append(s)
-
-    unique_symbols = list(dict.fromkeys(symbols))
-
-    print(f"Loaded {len(unique_symbols)} symbols from symbols.txt")
-    return unique_symbols
+    return list(dict.fromkeys(symbols))
 
 
 SYMBOLS = load_symbols()
-
-
-def safe_float(x, default=0):
-    try:
-        if pd.isna(x):
-            return default
-        return float(x)
-    except Exception:
-        return default
 
 
 def round_num(x, digits=2):
@@ -164,6 +43,15 @@ def round_num(x, digits=2):
         return round(float(x), digits)
     except Exception:
         return None
+
+
+def safe_float(x, default=0):
+    try:
+        if pd.isna(x):
+            return default
+        return float(x)
+    except Exception:
+        return default
 
 
 def pct(current, past):
@@ -177,7 +65,6 @@ def pct(current, past):
 
 def rsi(series, period=14):
     delta = series.diff()
-
     gain = delta.where(delta > 0, 0)
     loss = -delta.where(delta < 0, 0)
 
@@ -185,7 +72,6 @@ def rsi(series, period=14):
     avg_loss = loss.rolling(period).mean()
 
     rs = avg_gain / avg_loss
-
     return 100 - (100 / (1 + rs))
 
 
@@ -221,7 +107,7 @@ def normalize_df(df):
 
     for col in required:
         if col not in df.columns:
-            raise ValueError(f"Missing column: {col}. Current columns: {list(df.columns)}")
+            raise ValueError(f"Missing column {col}. Columns: {list(df.columns)}")
 
     for col in required:
         df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -238,14 +124,11 @@ def fetch_history(symbol):
     end = datetime.now()
     start = end - timedelta(days=540)
 
-    start_str = start.strftime("%Y-%m-%d")
-    end_str = end.strftime("%Y-%m-%d")
-
     q = Quote(symbol=symbol, source="VCI")
 
     df = q.history(
-        start=start_str,
-        end=end_str,
+        start=start.strftime("%Y-%m-%d"),
+        end=end.strftime("%Y-%m-%d"),
         interval="1D"
     )
 
@@ -259,7 +142,6 @@ def fetch_history(symbol):
 
 def is_rate_limit_error(error):
     msg = str(error).lower()
-
     keywords = [
         "rate limit",
         "request limit",
@@ -271,7 +153,6 @@ def is_rate_limit_error(error):
         "maximum",
         "api request limit"
     ]
-
     return any(k in msg for k in keywords)
 
 
@@ -279,46 +160,18 @@ def fetch_history_with_retry(symbol):
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             return fetch_history(symbol)
-
         except BaseException as e:
             if is_rate_limit_error(e):
-                print(
-                    f"Rate limit when fetching {symbol}. "
-                    f"Wait {RATE_LIMIT_WAIT_SECONDS}s. "
-                    f"Attempt {attempt}/{MAX_RETRIES}"
-                )
+                print(f"Rate limit at {symbol}. Wait {RATE_LIMIT_WAIT_SECONDS}s.")
                 time.sleep(RATE_LIMIT_WAIT_SECONDS)
-                continue
+            else:
+                print(f"Fetch error {symbol}: {e}")
+                time.sleep(5)
 
-            print(
-                f"Fetch error for {symbol}: {e}. "
-                f"Attempt {attempt}/{MAX_RETRIES}"
-            )
-            time.sleep(10 * attempt)
-
-    raise RuntimeError(f"Failed to fetch {symbol} after {MAX_RETRIES} retries")
+    raise RuntimeError(f"Failed to fetch {symbol}")
 
 
-def calculate_relative_strength(df, index_df):
-    if index_df is None:
-        return 0, 0
-
-    try:
-        stock_close = df["close"]
-        index_close = index_df["close"]
-
-        stock20 = pct(stock_close.iloc[-1], stock_close.iloc[-21])
-        index20 = pct(index_close.iloc[-1], index_close.iloc[-21])
-
-        stock60 = pct(stock_close.iloc[-1], stock_close.iloc[-61])
-        index60 = pct(index_close.iloc[-1], index_close.iloc[-61])
-
-        return stock20 - index20, stock60 - index60
-    except Exception:
-        return 0, 0
-
-
-def score_stock(symbol, df, index_df=None):
+def score_stock(symbol, df):
     close = df["close"]
     high = df["high"]
     low = df["low"]
@@ -387,6 +240,7 @@ def score_stock(symbol, df, index_df=None):
 
     macd_cross_up = prev_macd <= prev_signal and current_macd > current_signal
     hist_turn_positive = prev_hist <= 0 and current_hist > 0
+    hist_improving = current_hist > prev_hist
 
     rsi_recover50 = (
         (not pd.isna(rsi_10) and rsi_10 < 45 and current_rsi > 50) or
@@ -413,8 +267,6 @@ def score_stock(symbol, df, index_df=None):
         )
     except Exception:
         dry_volume_before_breakout = False
-
-    rs20, rs60 = calculate_relative_strength(df, index_df)
 
     trend = 0
     if above_ma20:
@@ -491,8 +343,6 @@ def score_stock(symbol, df, index_df=None):
         vic_leap += 2
     if above_ma20 and above_ma50 and above_ma100:
         vic_leap += 1
-    if rs20 > 5 or rs60 > 10:
-        vic_leap += 1
     if shakeout:
         vic_leap += 1
     if dry_volume_before_breakout:
@@ -513,13 +363,28 @@ def score_stock(symbol, df, index_df=None):
     risk = max(0, min(risk, 10))
 
     relative_strength = 0
-    if rs20 > 0:
-        relative_strength += 2
-    if rs20 > 5:
-        relative_strength += 2
-    if rs60 > 10:
-        relative_strength += 1
-    relative_strength = min(relative_strength, 5)
+
+    # T+ Score
+    tplus = 0
+
+    if above_ma20:
+        tplus += 2
+    if ma_turning_up:
+        tplus += 2
+    if 50 <= current_rsi <= 70:
+        tplus += 2
+    if 0 < change5 <= 10:
+        tplus += 2
+    if 1.2 <= volume_ratio20 <= 3:
+        tplus += 2
+    if breakout20 or pullback_ma20:
+        tplus += 2
+    if current_macd > current_signal or hist_improving:
+        tplus += 2
+    if risk >= 7:
+        tplus += 1
+
+    tplus = min(tplus, 15)
 
     total_score = round(
         trend +
@@ -535,6 +400,8 @@ def score_stock(symbol, df, index_df=None):
 
     if total_score >= 85:
         categories.append("Top cơ hội")
+    if tplus >= 10:
+        categories.append("Lướt sóng T+")
     if vic_leap >= 11:
         categories.append("Bước nhảy VIC")
     if breakout20:
@@ -563,6 +430,11 @@ def score_stock(symbol, df, index_df=None):
     positives = []
     risks = []
 
+    if tplus >= 12:
+        positives.append("Điểm T+ cao: giá trên MA20, RSI khỏe, dòng tiền cải thiện và setup ngắn hạn tốt.")
+    elif tplus >= 10:
+        positives.append("Có tín hiệu T+ tiềm năng, phù hợp theo dõi điểm mua ngắn hạn.")
+
     if above_ma20 and above_ma50 and above_ma100:
         positives.append("Giá nằm trên MA20, MA50 và MA100, cấu trúc xu hướng tích cực.")
 
@@ -573,10 +445,10 @@ def score_stock(symbol, df, index_df=None):
         positives.append("Giá breakout đỉnh 20 phiên.")
 
     if breakout60:
-        positives.append("Giá breakout đỉnh 60 phiên, tín hiệu mạnh hơn breakout ngắn hạn.")
+        positives.append("Giá breakout đỉnh 60 phiên.")
 
     if breakout120:
-        positives.append("Giá breakout đỉnh 120 phiên, thể hiện sức mạnh dài hơn.")
+        positives.append("Giá breakout đỉnh 120 phiên.")
 
     if volume_ratio20 >= 1.8:
         positives.append(f"Volume đạt {volume_ratio20:.2f} lần trung bình 20 phiên.")
@@ -596,9 +468,6 @@ def score_stock(symbol, df, index_df=None):
     if dry_volume_before_breakout:
         positives.append("Có dấu hiệu volume cạn trước đó rồi bùng lên.")
 
-    if rs20 > 5:
-        positives.append(f"Mạnh hơn VNINDEX khoảng {rs20:.2f}% trong 20 phiên.")
-
     if vic_leap >= 13:
         positives.append("VIC Leap rất cao: tích lũy, breakout, dòng tiền và động lượng cùng xác nhận.")
     elif vic_leap >= 11:
@@ -606,13 +475,10 @@ def score_stock(symbol, df, index_df=None):
 
     if rsi_hot:
         risks.append("RSI đang ở vùng nóng, hạn chế mua đuổi.")
-
     if change20 > 25:
         risks.append("Giá đã tăng mạnh trong 20 phiên, rủi ro rung lắc cao.")
-
     if price > current_ma20 * 1.15:
         risks.append("Giá cách xa MA20, nên chờ kiểm định hoặc rung lắc.")
-
     if price < current_ma50:
         risks.append("Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận.")
 
@@ -621,12 +487,16 @@ def score_stock(symbol, df, index_df=None):
 
     action = "THEO DÕI"
 
-    if total_score >= 88 and risk >= 7 and vic_leap >= 10:
+    if rsi_hot or price > current_ma20 * 1.15:
+        action = "TRÁNH MUA ĐUỔI"
+    elif tplus >= 12 and total_score >= 75 and risk >= 7:
         action = "MUA TỪNG PHẦN"
+    elif total_score >= 88 and risk >= 7 and vic_leap >= 10:
+        action = "MUA TỪNG PHẦN"
+    elif tplus >= 10 and risk >= 6:
+        action = "CHỜ ĐIỂM MUA"
     elif total_score >= 80 and risk >= 6:
         action = "CHỜ ĐIỂM MUA"
-    elif rsi_hot or price > current_ma20 * 1.15:
-        action = "TRÁNH MUA ĐUỔI"
 
     setup_name = "Theo dõi"
 
@@ -634,6 +504,10 @@ def score_stock(symbol, df, index_df=None):
         setup_name = "Bước nhảy mạnh giống VIC"
     elif vic_leap >= 11:
         setup_name = "Bước nhảy tiềm năng"
+    elif tplus >= 12:
+        setup_name = "Lướt sóng T+"
+    elif tplus >= 10:
+        setup_name = "T+ tiềm năng"
     elif breakout120:
         setup_name = "Breakout 120 phiên"
     elif breakout60:
@@ -647,12 +521,10 @@ def score_stock(symbol, df, index_df=None):
     elif base_range60 <= 35:
         setup_name = "Tích lũy nền"
 
-    info = COMPANY_INFO.get(symbol, {})
-
     return {
         "symbol": symbol,
-        "name": info.get("name", symbol),
-        "industry": info.get("industry", "Chưa phân ngành"),
+        "name": symbol,
+        "industry": "Chưa phân ngành",
 
         "price": round_num(price),
         "volume": safe_float(volume.iloc[-1]),
@@ -673,10 +545,11 @@ def score_stock(symbol, df, index_df=None):
         "volumeRatio20": round_num(volume_ratio20),
         "volumeRatio50": round_num(volume_ratio50),
 
-        "rs20": round_num(rs20),
-        "rs60": round_num(rs60),
+        "rs20": 0,
+        "rs60": 0,
 
         "score": total_score,
+        "tplusScore": tplus,
         "action": action,
         "setup": setup_name,
         "marketState": "Uptrend mạnh" if trend >= 16 else "Uptrend" if trend >= 12 else "Chưa xác nhận",
@@ -687,6 +560,7 @@ def score_stock(symbol, df, index_df=None):
             "money": money,
             "setup": setup,
             "vicLeap": vic_leap,
+            "tplus": tplus,
             "risk": risk,
             "relativeStrength": relative_strength
         },
@@ -715,10 +589,6 @@ def main():
     print(f"Total symbols: {len(SYMBOLS)}")
     print(f"Delay per request: {REQUEST_DELAY_SECONDS}s")
 
-    # Tạm bỏ VNINDEX để tiết kiệm request.
-    # RS so với VNINDEX sẽ = 0.
-    index_df = None
-
     results = []
 
     for idx, symbol in enumerate(SYMBOLS, start=1):
@@ -726,12 +596,13 @@ def main():
             print(f"[{idx}/{len(SYMBOLS)}] Scanning {symbol}...")
 
             df = fetch_history_with_retry(symbol)
-            scored = score_stock(symbol, df, index_df)
+            scored = score_stock(symbol, df)
 
             if scored:
                 results.append(scored)
                 print(
                     f"OK {symbol}: score={scored.get('score')} "
+                    f"T+={scored.get('tplusScore')} "
                     f"setup={scored.get('setup')}"
                 )
 
@@ -747,7 +618,6 @@ def main():
             continue
 
     save_results(results)
-
     print(f"Done. Wrote {len(results)} stocks to data.json")
 
 
