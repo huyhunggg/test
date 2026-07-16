@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from vnstock import Vnstock
+from vnstock.api.quote import Quote
 
 
 SYMBOLS = [
