@@ -16,22 +16,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          node-version: 20
+          python-version: "3.11"
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Debug secrets
+      - name: Install Python dependencies
         run: |
-          echo "VNSTOCK_API_KEY is set: ${{ secrets.VNSTOCK_API_KEY != '' }}"
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run scanner
-        env:
-          VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
-        run: npm run scan
+        run: python scripts/scan.py
 
       - name: Commit updated data
         run: |
