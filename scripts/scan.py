@@ -167,8 +167,9 @@ def fetch_history(symbol):
     start_str = start.strftime("%Y-%m-%d")
     end_str = end.strftime("%Y-%m-%d")
 
-    stock = Vnstock().stock(symbol=symbol, source="VCI")
-    df = stock.quote.history(
+    q = Quote(symbol=symbol, source="VCI")
+
+    df = q.history(
         start=start_str,
         end=end_str,
         interval="1D"
