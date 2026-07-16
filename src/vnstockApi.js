@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_KEY, BASE_URL, OHLCV_URL } from "./config.js";
+import { API_KEY, VNSTOCK_ENDPOINTS } from "./config.js";
 
 export function normalizeOHLCV(raw) {
   const rows = Array.isArray(raw)
@@ -25,61 +25,61 @@ export function normalizeOHLCV(raw) {
     .sort((a, b) => new Date(a.time) - new Date(b.time));
 }
 
+function buildHeaders() {
+  return {
+    Authorization: `Bearer ${API_KEY}`,
+    "x-api-key": API_KEY,
+    "X-API-KEY": API_KEY,
+    "api-key": API_KEY
+  };
+}
+
+/**
+ * Hàm này hiện chỉ cần VNSTOCK_API_KEY.
+ * Không cần VNSTOCK_BASE_URL.
+ * Không cần VNSTOCK_OHLCV_URL.
+ */
 export async function fetchOHLCV(symbol, limit = 260) {
   if (!API_KEY) {
     throw new Error("Missing VNSTOCK_API_KEY");
   }
 
-  const headers = {
-    Authorization: `Bearer ${API_KEY}`,
-    "x-api-key": API_KEY
-  };
+  const url = VNSTOCK_ENDPOINTS.ohlcv;
 
-  let urls = [];
-
-  /**
-   * Nếu bạn có endpoint chính xác, nên set GitHub Secret:
-   *
-   * VNSTOCK_OHLCV_URL=https://.../ohlcv?symbol={symbol}&limit={limit}
-   *
-   * Hoặc:
-   *
-   * VNSTOCK_OHLCV_URL=https://.../api/v1/candle?symbol={symbol}&interval=1D&limit={limit}
-   */
-  if (OHLCV_URL) {
-    urls.push(
-      OHLCV_URL
-        .replace("{symbol}", encodeURIComponent(symbol))
-        .replace("{ticker}", encodeURIComponent(symbol))
-        .replace("{limit}", String(limit))
-    );
-  } else {
-    urls = [
-      `${BASE_URL}/ohlcv`,
-      `${BASE_URL}/api/ohlcv`,
-      `${BASE_URL}/api/v1/ohlcv`,
-      `${BASE_URL}/stock/ohlcv`,
-      `${BASE_URL}/api/v1/stock/ohlcv`
-    ];
-  }
+  const requestVariants = [
+    {
+      params: {
+        symbol,
+        limit,
+        timeframe: "1D"
+      }
+    },
+    {
+      params: {
+        ticker: symbol,
+        limit,
+        interval: "1D"
+      }
+    },
+    {
+      params: {
+        code: symbol,
+        limit,
+        resolution: "1D"
+      }
+    }
+  ];
 
   let lastError = null;
 
-  for (const url of urls) {
+  for (const variant of requestVariants) {
     try {
+      console.log(`Calling VNStock API: ${url} - ${symbol}`);
+
       const res = await axios.get(url, {
-        headers,
-        params: OHLCV_URL
-          ? {}
-          : {
-              symbol,
-              ticker: symbol,
-              timeframe: "1D",
-              interval: "1D",
-              resolution: "1D",
-              limit
-            },
-        timeout: 25000
+        headers: buildHeaders(),
+        params: variant.params,
+        timeout: 30000
       });
 
       const data = normalizeOHLCV(res.data);
@@ -88,13 +88,15 @@ export async function fetchOHLCV(symbol, limit = 260) {
         return data.slice(-limit);
       }
 
-      lastError = new Error(`Data length ${data.length} < 120`);
+      lastError = new Error(
+        `API responded but OHLCV length is ${data.length}. Need at least 120.`
+      );
     } catch (err) {
       lastError = err;
     }
   }
 
   throw new Error(
-    `Cannot fetch OHLCV for ${symbol}: ${lastError?.message || "unknown"}`
+    `Cannot fetch OHLCV for ${symbol}: ${lastError?.message || "unknown error"}`
   );
 }
