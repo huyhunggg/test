@@ -3,14 +3,19 @@ name: Update Stock Radar Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/30 * * * *"
 
 permissions:
   contents: write
 
+concurrency:
+  group: stock-radar-scan
+  cancel-in-progress: false
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    timeout-minutes: 55
 
     steps:
       - name: Checkout repository
