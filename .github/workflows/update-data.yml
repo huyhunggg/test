@@ -24,12 +24,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Debug secrets
+        run: |
+          echo "VNSTOCK_API_KEY is set: ${{ secrets.VNSTOCK_API_KEY != '' }}"
+
       - name: Run scanner
         env:
           VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
-          VNSTOCK_BASE_URL: ${{ secrets.VNSTOCK_BASE_URL }}
-          VNSTOCK_OHLCV_URL: ${{ secrets.VNSTOCK_OHLCV_URL }}
-          SYMBOLS: ${{ secrets.SYMBOLS }}
         run: npm run scan
 
       - name: Commit updated data
