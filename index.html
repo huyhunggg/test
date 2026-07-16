@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>VN Stock Radar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --bg: #f3f6fa;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e5e7eb;
+      --primary: #071124;
+      --green: #16a34a;
+      --green-bg: #ecfdf5;
+      --orange-bg: #fff7ed;
+      --blue-bg: #f5faff;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      padding: 24px;
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .subtitle,
+    .live {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+
+    .tab {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    input,
+    select {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 15px;
+      font-size: 15px;
+      width: 100%;
+      background: white;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.85fr);
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 26px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      border: 1px solid transparent;
+      min-height: 390px;
+    }
+
+    .card.active {
+      border-color: #0f172a;
+    }
+
+    .head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .symbol {
+      font-size: 44px;
+      margin: 0;
+      letter-spacing: -0.08em;
+      font-weight: 950;
+    }
+
+    .company {
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    .badge {
+      background: #dcffe8;
+      color: #047857;
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .badge.vic {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .bar {
+      height: 9px;
+      background: #edf2f7;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 18px 0;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      background: var(--primary);
+    }
+
+    .action {
+      font-weight: 950;
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .desc {
+      color: #475569;
+      line-height: 1.55;
+      margin-bottom: 16px;
+      font-size: 15px;
+    }
+
+    .metrics,
+    .scores {
+      display: grid;
+      gap: 10px;
+    }
+
+    .metrics {
+      grid-template-columns: repeat(4, 1fr);
+      margin-bottom: 10px;
+    }
+
+    .scores {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .box {
+      background: var(--blue-bg);
+      padding: 12px;
+      border-radius: 16px;
+      min-height: 62px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .value {
+      font-weight: 900;
+    }
+
+    .tags {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      background: #f8fafc;
+      border: 1px solid #edf2f7;
+      padding: 7px 11px;
+      border-radius: 999px;
+      color: #475569;
+      font-size: 13px;
+    }
+
+    .tag.hot {
+      background: #ecfdf5;
+      color: #166534;
+    }
+
+    .detail {
+      background: white;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 180px;
+      max-height: calc(100vh - 200px);
+      overflow: auto;
+    }
+
+    .detail-symbol {
+      font-size: 56px;
+      font-weight: 950;
+      letter-spacing: -0.08em;
+      margin: 0;
+    }
+
+    .section {
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+      padding-top: 20px;
+    }
+
+    .good,
+    .risk,
+    .neutral {
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 10px;
+      line-height: 1.45;
+    }
+
+    .good {
+      background: var(--green-bg);
+      color: #166534;
+    }
+
+    .risk {
+      background: var(--orange-bg);
+      color: #9a3412;
+    }
+
+    .neutral {
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    .empty {
+      background: white;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 40px;
+      color: var(--muted);
+      grid-column: 1 / -1;
+      text-align: center;
+    }
+
+    @media (max-width: 1150px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .detail {
+        position: static;
+        max-height: none;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 12px;
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <section class="header">
+      <div class="top">
+        <div>
+          <h1>VN Stock Radar</h1>
+          <div class="subtitle">
+            Quét cổ phiếu theo Breakout, Pullback, Dòng tiền, MACD, RSI và mẫu “Bước nhảy VIC”
+          </div>
+        </div>
+
+        <div class="live" id="updatedAt">Đang tải...</div>
+      </div>
+
+      <div class="tabs" id="tabs"></div>
+
+      <div class="filters">
+        <input id="search" placeholder="Tìm mã, tên công ty, ngành..." />
+
+        <select id="industry">
+          <option value="all">Tất cả ngành</option>
+        </select>
+
+        <select id="action">
+          <option value="all">Tất cả hành động</option>
+          <option value="MUA TỪNG PHẦN">Mua từng phần</option>
+          <option value="CHỜ ĐIỂM MUA">Chờ điểm mua</option>
+          <option value="THEO DÕI">Theo dõi</option>
+          <option value="TRÁNH MUA ĐUỔI">Tránh mua đuổi</option>
+        </select>
+
+        <select id="minScore">
+          <option value="0">Điểm tối thiểu</option>
+          <option value="70">Từ 70</option>
+          <option value="80">Từ 80</option>
+          <option value="85">Từ 85</option>
+          <option value="90">Từ 90</option>
+        </select>
+
+        <select id="sort">
+          <option value="score">Điểm cao nhất</option>
+          <option value="vicLeap">Bước nhảy VIC</option>
+          <option value="money">Dòng tiền mạnh</option>
+          <option value="change20">Tăng 20 phiên</option>
+          <option value="rs20">Mạnh hơn VNINDEX</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="cards" id="cards"></div>
+      <aside class="detail" id="detail"></aside>
+    </section>
+  </main>
+
+  <script>
+    const tabs = [
+      "Top cơ hội",
+      "Bước nhảy VIC",
+      "Breakout 20 phiên",
+      "Breakout 60 phiên",
+      "Breakout 120 phiên",
+      "Pullback MA20",
+      "Pullback MA50",
+      "Dòng tiền mạnh",
+      "MACD đảo chiều",
+      "RSI hồi phục",
+      "Tích lũy nền",
+      "An toàn",
+      "Tất cả mã"
+    ];
+
+    let stocks = [];
+    let activeTab = "Bước nhảy VIC";
+    let selectedSymbol = null;
+
+    function formatNumber(n, digits = 2) {
+      if (n === null || n === undefined || Number.isNaN(Number(n))) return "-";
+      return Number(n).toLocaleString("vi-VN", { maximumFractionDigits: digits });
+    }
+
+    function renderTabs() {
+      document.getElementById("tabs").innerHTML = tabs.map(tab => `
+        <button class="tab ${tab === activeTab ? "active" : ""}" onclick="setTab('${tab}')">
+          ${tab}
+        </button>
+      `).join("");
+    }
+
+    function renderIndustryOptions() {
+      const select = document.getElementById("industry");
+      const current = select.value || "all";
+      const industries = [...new Set(stocks.map(x => x.industry).filter(Boolean))].sort();
+
+      select.innerHTML =
+        `<option value="all">Tất cả ngành</option>` +
+        industries.map(x => `<option value="${x}">${x}</option>`).join("");
+
+      if ([...select.options].some(o => o.value === current)) {
+        select.value = current;
+      }
+    }
+
+    function getFiltered() {
+      const search = document.getElementById("search").value.toLowerCase().trim();
+      const industry = document.getElementById("industry").value;
+      const action = document.getElementById("action").value;
+      const minScore = Number(document.getElementById("minScore").value);
+      const sort = document.getElementById("sort").value;
+
+      let data = stocks.filter(s => {
+        const categories = s.categories || [];
+
+        const matchTab = activeTab === "Tất cả mã" || categories.includes(activeTab);
+
+        const matchSearch =
+          !search ||
+          String(s.symbol || "").toLowerCase().includes(search) ||
+          String(s.name || "").toLowerCase().includes(search) ||
+          String(s.industry || "").toLowerCase().includes(search);
+
+        const matchIndustry = industry === "all" || s.industry === industry;
+        const matchAction = action === "all" || s.action === action;
+        const matchScore = Number(s.score || 0) >= minScore;
+
+        return matchTab && matchSearch && matchIndustry && matchAction && matchScore;
+      });
+
+      data.sort((a, b) => {
+        if (sort === "score") return Number(b.score || 0) - Number(a.score || 0);
+        if (sort === "vicLeap") return Number(b.scoreParts?.vicLeap || 0) - Number(a.scoreParts?.vicLeap || 0);
+        if (sort === "money") return Number(b.scoreParts?.money || 0) - Number(a.scoreParts?.money || 0);
+        if (sort === "change20") return Number(b.change20 || 0) - Number(a.change20 || 0);
+        if (sort === "rs20") return Number(b.rs20 || 0) - Number(a.rs20 || 0);
+        return Number(b.score || 0) - Number(a.score || 0);
+      });
+
+      return data;
+    }
+
+    function renderCards() {
+      const data = getFiltered();
+      const cards = document.getElementById("cards");
+
+      if (!data.length) {
+        cards.innerHTML = `<div class="empty">Không có mã phù hợp bộ lọc hiện tại.</div>`;
+        renderDetail(null);
+        return;
+      }
+
+      if (!selectedSymbol || !data.find(x => x.symbol === selectedSymbol)) {
+        selectedSymbol = data[0].symbol;
+      }
+
+      cards.innerHTML = data.map(s => {
+        const score = Number(s.score || 0);
+        const vicScore = Number(s.scoreParts?.vicLeap || 0);
+
+        return `
+          <article class="card ${s.symbol === selectedSymbol ? "active" : ""}" onclick="selectStock('${s.symbol}')">
+            <div class="head">
+              <div>
+                <h2 class="symbol">${s.symbol}</h2>
+                <div class="company">${s.name || s.symbol} · ${s.industry || "Chưa phân ngành"}</div>
+              </div>
+              <div>
+                <div class="badge">${score}/100</div>
+                <div class="badge vic">VIC ${vicScore}/15</div>
+              </div>
+            </div>
+
+            <div class="bar"><span style="width:${Math.min(score, 100)}%"></span></div>
+
+            <div class="action">${s.action || "THEO DÕI"}</div>
+
+            <div class="desc">
+              <b>Setup:</b> ${s.setup || "Theo dõi"}.
+              Giá ${formatNumber(s.price)}, RSI ${formatNumber(s.rsi)},
+              20 phiên ${formatNumber(s.change20)}%,
+              Vol ${formatNumber(s.volumeRatio20)}x TB20.
+            </div>
+
+            <div class="metrics">
+              <div class="box"><div class="label">Giá</div><div class="value">${formatNumber(s.price)}</div></div>
+              <div class="box"><div class="label">RSI</div><div class="value">${formatNumber(s.rsi)}</div></div>
+              <div class="box"><div class="label">20 phiên</div><div class="value">${formatNumber(s.change20)}%</div></div>
+              <div class="box"><div class="label">Vol</div><div class="value">${formatNumber(s.volumeRatio20)}x</div></div>
+            </div>
+
+            <div class="scores">
+              <div class="box"><div class="label">Trend</div><div class="value">${s.scoreParts?.trend ?? "-"}</div></div>
+              <div class="box"><div class="label">Mom</div><div class="value">${s.scoreParts?.momentum ?? "-"}</div></div>
+              <div class="box"><div class="label">Money</div><div class="value">${s.scoreParts?.money ?? "-"}</div></div>
+              <div class="box"><div class="label">Setup</div><div class="value">${s.scoreParts?.setup ?? "-"}</div></div>
+              <div class="box"><div class="label">VIC Leap</div><div class="value">${s.scoreParts?.vicLeap ?? "-"}</div></div>
+              <div class="box"><div class="label">Risk</div><div class="value">${s.scoreParts?.risk ?? "-"}</div></div>
+            </div>
+
+            <div class="tags">
+              ${(s.categories || []).slice(0, 5).map(c => `
+                <span class="tag ${c === "Bước nhảy VIC" || c === "Top cơ hội" ? "hot" : ""}">${c}</span>
+              `).join("")}
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      renderDetail(stocks.find(x => x.symbol === selectedSymbol));
+    }
+
+    function renderDetail(s) {
+      const detail = document.getElementById("detail");
+
+      if (!s) {
+        detail.innerHTML = `<h2 class="detail-symbol">---</h2><div class="company">Chưa chọn mã</div>`;
+        return;
+      }
+
+      detail.innerHTML = `
+        <div class="head">
+          <div>
+            <h2 class="detail-symbol">${s.symbol}</h2>
+            <div class="company">${s.name || s.symbol} · ${s.industry || "Chưa phân ngành"}</div>
+          </div>
+          <div class="badge">${s.score}/100</div>
+        </div>
+
+        <div class="bar"><span style="width:${Math.min(s.score, 100)}%"></span></div>
+
+        <div class="section">
+          <h3>Kết luận</h3>
+          <div class="desc">
+            <b>${s.action || "THEO DÕI"}</b> · Setup: <b>${s.setup || "Theo dõi"}</b> ·
+            Market state: ${s.marketState || "-"}.
+            Điểm VIC Leap: <b>${s.scoreParts?.vicLeap ?? "-"}/15</b>.
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Chỉ báo chính</h3>
+          <div class="scores">
+            <div class="box"><div class="label">MA20</div><div class="value">${formatNumber(s.ma20)}</div></div>
+            <div class="box"><div class="label">MA50</div><div class="value">${formatNumber(s.ma50)}</div></div>
+            <div class="box"><div class="label">MA100</div><div class="value">${formatNumber(s.ma100)}</div></div>
+            <div class="box"><div class="label">MACD</div><div class="value">${formatNumber(s.macd)}</div></div>
+            <div class="box"><div class="label">Signal</div><div class="value">${formatNumber(s.macdSignal)}</div></div>
+            <div class="box"><div class="label">Hist</div><div class="value">${formatNumber(s.macdHistogram)}</div></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Tín hiệu tích cực</h3>
+          ${(s.positives || []).length
+            ? s.positives.map(x => `<div class="good">✅ ${x}</div>`).join("")
+            : `<div class="neutral">Chưa có tín hiệu nổi bật.</div>`
+          }
+        </div>
+
+        <div class="section">
+          <h3>Rủi ro cần lưu ý</h3>
+          ${(s.risks || []).length
+            ? s.risks.map(x => `<div class="risk">⚠️ ${x}</div>`).join("")
+            : `<div class="neutral">Chưa ghi nhận rủi ro kỹ thuật lớn.</div>`
+          }
+        </div>
+      `;
+    }
+
+    function setTab(tab) {
+      activeTab = tab;
+      renderTabs();
+      renderCards();
+    }
+
+    function selectStock(symbol) {
+      selectedSymbol = symbol;
+      renderCards();
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch("./data.json?t=" + Date.now());
+        const json = await res.json();
+
+        stocks = json.data || [];
+
+        const updated = json.updatedAt
+          ? new Date(json.updatedAt).toLocaleString("vi-VN")
+          : "Không rõ";
+
+        document.getElementById("updatedAt").textContent =
+          `Cập nhật: ${updated} · ${stocks.length} mã`;
+
+        renderIndustryOptions();
+        renderCards();
+      } catch (err) {
+        console.error(err);
+        document.getElementById("updatedAt").textContent = "Không tải được data.json";
+      }
+    }
+
+    ["search", "industry", "action", "minScore", "sort"].forEach(id => {
+      document.getElementById(id).addEventListener("input", renderCards);
+      document.getElementById(id).addEventListener("change", renderCards);
+    });
+
+    renderTabs();
+    loadData();
+    setInterval(loadData, 60000);
+  </script>
+</body>
+</html>
