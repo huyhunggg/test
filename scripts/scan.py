@@ -7,9 +7,9 @@ import pandas as pd
 from vnstock.api.quote import Quote
 
 
-REQUEST_DELAY_SECONDS = 5.2
-RATE_LIMIT_WAIT_SECONDS = 75
-MAX_RETRIES = 3
+REQUEST_DELAY_SECONDS = 3.6
+RATE_LIMIT_WAIT_SECONDS = 65
+MAX_RETRIES = 1
 
 
 COMPANY_INFO = {
