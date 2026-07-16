@@ -1,0 +1,95 @@
+{
+  "updatedAt": "2026-01-01T00:00:00.000Z",
+  "count": 2,
+  "data": [
+    {
+      "symbol": "VIC",
+      "name": "Tập đoàn Vingroup",
+      "industry": "Bất động sản / Holding",
+      "price": 216.9,
+      "volume": 772500,
+      "rsi": 51.24,
+      "macd": 2.71,
+      "macdSignal": 3.6,
+      "macdHistogram": -0.89,
+      "ma20": 220.62,
+      "ma50": 214.26,
+      "ma100": 188.94,
+      "change20": 8.5,
+      "volumeRatio20": 1.8,
+      "rs20": 7.2,
+      "score": 88,
+      "action": "CHỜ ĐIỂM MUA",
+      "setup": "Bước nhảy tiềm năng",
+      "marketState": "Uptrend mạnh",
+      "scoreParts": {
+        "trend": 18,
+        "momentum": 12,
+        "money": 16,
+        "setup": 14,
+        "vicLeap": 12,
+        "risk": 9,
+        "relativeStrength": 5
+      },
+      "categories": [
+        "Top cơ hội",
+        "Bước nhảy VIC",
+        "Dòng tiền mạnh",
+        "Tích lũy nền",
+        "Tất cả mã"
+      ],
+      "positives": [
+        "Có nhiều đặc điểm tương đồng pha bước nhảy của VIC.",
+        "Giá duy trì trên MA50 và MA100.",
+        "Volume tăng so với trung bình."
+      ],
+      "risks": [
+        "Nên giải ngân từng phần, tránh mua đuổi."
+      ]
+    },
+    {
+      "symbol": "HCM",
+      "name": "Chứng khoán HSC",
+      "industry": "Chứng khoán",
+      "price": 29600,
+      "volume": 1500000,
+      "rsi": 69.72,
+      "macd": 1.23,
+      "macdSignal": 0.98,
+      "macdHistogram": 0.25,
+      "ma20": 28500,
+      "ma50": 27000,
+      "ma100": 25000,
+      "change20": 10.24,
+      "volumeRatio20": 1.4,
+      "rs20": 5.5,
+      "score": 86,
+      "action": "MUA TỪNG PHẦN",
+      "setup": "Breakout 20 phiên",
+      "marketState": "Uptrend mạnh",
+      "scoreParts": {
+        "trend": 20,
+        "momentum": 11,
+        "money": 18,
+        "setup": 14,
+        "vicLeap": 8,
+        "risk": 10,
+        "relativeStrength": 5
+      },
+      "categories": [
+        "Top cơ hội",
+        "Breakout 20 phiên",
+        "Dòng tiền mạnh",
+        "An toàn",
+        "Tất cả mã"
+      ],
+      "positives": [
+        "Giá nằm trên MA20, MA50 và MA100.",
+        "Dòng tiền cải thiện so với trung bình."
+      ],
+      "risks": [
+        "RSI tương đối cao, tránh mua đuổi tỷ trọng lớn."
+      ]
+    }
+  ]
+}
