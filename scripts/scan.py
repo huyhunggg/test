@@ -7,34 +7,208 @@ import pandas as pd
 from vnstock.api.quote import Quote
 
 
+# =========================
+# CONFIG
+# =========================
+
 REQUEST_DELAY_SECONDS = 3.6
 RATE_LIMIT_WAIT_SECONDS = 65
 MAX_RETRIES = 1
 
+MAX_STALE_DAYS = 14
+MIN_AVG_VOL20 = 50000
+MIN_RECENT_VOLUME_DAYS = 5
+
+PENNY_MAX_PRICE = 15
+PENNY_MIN_AVG_VOL20 = 100000
+
+
+BLACKLIST_SYMBOLS = {
+    # Mã nghi ngờ không còn giao dịch / dữ liệu không đáng tin / mã rác
+    "BBC", "XLV",
+    "X20", "X26", "X77", "XDH", "XHC", "XMC",
+    "WTC", "VTX",
+
+    # Có thể bổ sung thêm nếu bạn thấy mã nào bị lỗi dữ liệu
+    "VST", "VSM", "VSI", "VSF", "VSE", "VSA",
+    "VQC", "VPS", "VPR", "VPC", "VPA",
+    "VNX", "VNP", "VNI", "VNF", "VNB",
+    "VMS", "VMB", "VLP", "VLG", "VLA",
+    "VTJ", "VTK", "VTL", "VTM", "VTN", "VTR", "VTS",
+    "VTG", "VTH", "VTD", "VTE"
+}
+
+
+BLUECHIP_SYMBOLS = {
+    # Ngân hàng
+    "VCB", "BID", "CTG", "TCB", "MBB", "ACB", "VPB", "STB", "HDB", "VIB", "TPB", "LPB", "EIB", "OCB", "SHB",
+
+    # Bất động sản / Holding
+    "VIC", "VHM", "VRE", "BCM", "KDH", "NLG",
+
+    # Công nghệ / Bán lẻ
+    "FPT", "MWG", "PNJ", "FRT",
+
+    # Hàng hóa / Công nghiệp
+    "HPG", "GAS", "PLX", "POW", "GVR", "REE", "GEX", "DGC",
+
+    # Tiêu dùng
+    "MSN", "VNM", "SAB", "MCH", "QNS",
+
+    # Chứng khoán
+    "SSI", "HCM", "VCI", "VND", "SHS", "MBS", "FTS", "BSI",
+
+    # Logistics / Hạ tầng / Hàng không
+    "GMD", "VJC", "HVN", "ACV", "VTP",
+
+    # Khác
+    "BVH", "PVD", "PVS", "BSR"
+}
+
+
+COMPANY_INFO = {
+    "ACB": {"name": "ACB", "industry": "Ngân hàng"},
+    "BID": {"name": "BIDV", "industry": "Ngân hàng"},
+    "CTG": {"name": "VietinBank", "industry": "Ngân hàng"},
+    "VCB": {"name": "Vietcombank", "industry": "Ngân hàng"},
+    "TCB": {"name": "Techcombank", "industry": "Ngân hàng"},
+    "MBB": {"name": "MB Bank", "industry": "Ngân hàng"},
+    "VPB": {"name": "VPBank", "industry": "Ngân hàng"},
+    "STB": {"name": "Sacombank", "industry": "Ngân hàng"},
+    "HDB": {"name": "HDBank", "industry": "Ngân hàng"},
+    "VIB": {"name": "VIB", "industry": "Ngân hàng"},
+    "TPB": {"name": "TPBank", "industry": "Ngân hàng"},
+    "LPB": {"name": "LPBank", "industry": "Ngân hàng"},
+    "EIB": {"name": "Eximbank", "industry": "Ngân hàng"},
+    "OCB": {"name": "OCB", "industry": "Ngân hàng"},
+    "SHB": {"name": "SHB", "industry": "Ngân hàng"},
+
+    "VIC": {"name": "Tập đoàn Vingroup", "industry": "Bất động sản / Holding"},
+    "VHM": {"name": "Vinhomes", "industry": "Bất động sản"},
+    "VRE": {"name": "Vincom Retail", "industry": "Bất động sản bán lẻ"},
+    "KDH": {"name": "Khang Điền", "industry": "Bất động sản"},
+    "NLG": {"name": "Nam Long", "industry": "Bất động sản"},
+    "DXG": {"name": "Đất Xanh", "industry": "Bất động sản"},
+    "DIG": {"name": "DIC Corp", "industry": "Bất động sản"},
+    "PDR": {"name": "Phát Đạt", "industry": "Bất động sản"},
+    "NVL": {"name": "Novaland", "industry": "Bất động sản"},
+    "CEO": {"name": "CEO Group", "industry": "Bất động sản"},
+
+    "KBC": {"name": "Kinh Bắc", "industry": "Bất động sản KCN"},
+    "IDC": {"name": "IDICO", "industry": "Bất động sản KCN"},
+    "SZC": {"name": "Sonadezi Châu Đức", "industry": "Bất động sản KCN"},
+    "BCM": {"name": "Becamex", "industry": "Bất động sản KCN"},
+    "LHG": {"name": "Long Hậu", "industry": "Bất động sản KCN"},
+    "NTC": {"name": "Nam Tân Uyên", "industry": "Bất động sản KCN"},
+
+    "FPT": {"name": "FPT Corporation", "industry": "Công nghệ"},
+    "FOX": {"name": "FPT Telecom", "industry": "Công nghệ / Viễn thông"},
+    "CMG": {"name": "CMC Corp", "industry": "Công nghệ"},
+    "ELC": {"name": "ELCOM", "industry": "Công nghệ"},
+    "CTR": {"name": "Viettel Construction", "industry": "Viễn thông / Hạ tầng"},
+
+    "MWG": {"name": "Thế Giới Di Động", "industry": "Bán lẻ"},
+    "DGW": {"name": "Digiworld", "industry": "Bán lẻ / Phân phối"},
+    "FRT": {"name": "FPT Retail", "industry": "Bán lẻ"},
+    "PNJ": {"name": "Vàng bạc Đá quý Phú Nhuận", "industry": "Bán lẻ / Trang sức"},
+
+    "HPG": {"name": "Hòa Phát", "industry": "Thép"},
+    "HSG": {"name": "Hoa Sen", "industry": "Thép"},
+    "NKG": {"name": "Nam Kim", "industry": "Thép"},
+
+    "SSI": {"name": "Chứng khoán SSI", "industry": "Chứng khoán"},
+    "HCM": {"name": "Chứng khoán HSC", "industry": "Chứng khoán"},
+    "VCI": {"name": "Chứng khoán Vietcap", "industry": "Chứng khoán"},
+    "VND": {"name": "Chứng khoán VNDirect", "industry": "Chứng khoán"},
+    "SHS": {"name": "Chứng khoán Sài Gòn Hà Nội", "industry": "Chứng khoán"},
+    "MBS": {"name": "Chứng khoán MB", "industry": "Chứng khoán"},
+    "FTS": {"name": "Chứng khoán FPT", "industry": "Chứng khoán"},
+    "BSI": {"name": "Chứng khoán BIDV", "industry": "Chứng khoán"},
+    "CTS": {"name": "Chứng khoán VietinBank", "industry": "Chứng khoán"},
+    "VIX": {"name": "Chứng khoán VIX", "industry": "Chứng khoán"},
+
+    "PVD": {"name": "PV Drilling", "industry": "Dầu khí"},
+    "PVS": {"name": "PVS", "industry": "Dầu khí"},
+    "GAS": {"name": "PV Gas", "industry": "Dầu khí"},
+    "BSR": {"name": "Lọc hóa dầu Bình Sơn", "industry": "Dầu khí"},
+    "PLX": {"name": "Petrolimex", "industry": "Dầu khí"},
+    "PVT": {"name": "PVTrans", "industry": "Dầu khí / Vận tải"},
+
+    "GEX": {"name": "Gelex", "industry": "Công nghiệp"},
+    "REE": {"name": "REE Corp", "industry": "Điện / Cơ điện lạnh"},
+    "PC1": {"name": "PC1 Group", "industry": "Xây lắp điện"},
+    "HDG": {"name": "Hà Đô", "industry": "Bất động sản / Năng lượng"},
+    "POW": {"name": "PV Power", "industry": "Điện"},
+    "NT2": {"name": "Điện Nhơn Trạch 2", "industry": "Điện"},
+    "PPC": {"name": "Nhiệt điện Phả Lại", "industry": "Điện"},
+
+    "VNM": {"name": "Vinamilk", "industry": "Thực phẩm"},
+    "MSN": {"name": "Masan", "industry": "Tiêu dùng"},
+    "SAB": {"name": "Sabeco", "industry": "Đồ uống"},
+    "MCH": {"name": "Masan Consumer", "industry": "Tiêu dùng"},
+    "QNS": {"name": "Đường Quảng Ngãi", "industry": "Thực phẩm"},
+    "DBC": {"name": "Dabaco", "industry": "Nông nghiệp / Thực phẩm"},
+    "BAF": {"name": "BAF Việt Nam", "industry": "Nông nghiệp / Thực phẩm"},
+
+    "GMD": {"name": "Gemadept", "industry": "Cảng biển / Logistics"},
+    "HAH": {"name": "Hải An", "industry": "Vận tải biển"},
+    "VSC": {"name": "Viconship", "industry": "Cảng biển"},
+    "VTP": {"name": "Viettel Post", "industry": "Logistics"},
+
+    "DGC": {"name": "Hóa chất Đức Giang", "industry": "Hóa chất"},
+    "CSV": {"name": "Hóa chất Cơ bản Miền Nam", "industry": "Hóa chất"},
+    "DDV": {"name": "DAP Vinachem", "industry": "Hóa chất"},
+    "DPM": {"name": "Đạm Phú Mỹ", "industry": "Phân bón"},
+    "DCM": {"name": "Đạm Cà Mau", "industry": "Phân bón"},
+
+    "VJC": {"name": "Vietjet Air", "industry": "Hàng không"},
+    "HVN": {"name": "Vietnam Airlines", "industry": "Hàng không"},
+    "ACV": {"name": "Cảng hàng không Việt Nam", "industry": "Hạ tầng hàng không"},
+}
+
+
+# =========================
+# LOAD SYMBOLS
+# =========================
 
 def load_symbols():
     try:
         with open("symbols.txt", "r", encoding="utf-8") as f:
             raw = f.read()
     except FileNotFoundError:
-        return [
-            "VIC", "VHM", "VRE", "FPT", "HPG", "HCM",
-            "SSI", "VCI", "VND", "BID", "CTG", "MBB",
-            "TCB", "ACB", "STB", "PVD", "GEX", "KBC"
-        ]
+        print("symbols.txt not found. Using fallback symbols.")
+        raw = """
+        VIC,VHM,VRE,FPT,HPG,HCM,SSI,VCI,VND,BID,CTG,MBB,
+        TCB,ACB,STB,PVD,GEX,KBC,MWG,DGW,PNJ,DGC,GMD
+        """
 
     symbols = []
 
     for line in raw.replace(",", "\n").splitlines():
         s = line.strip().upper()
-        if s and not s.startswith("#"):
-            symbols.append(s)
 
-    return list(dict.fromkeys(symbols))
+        if not s:
+            continue
+
+        if s.startswith("#"):
+            continue
+
+        if s in BLACKLIST_SYMBOLS:
+            continue
+
+        symbols.append(s)
+
+    unique_symbols = list(dict.fromkeys(symbols))
+    print(f"Loaded {len(unique_symbols)} symbols after blacklist filter.")
+    return unique_symbols
 
 
 SYMBOLS = load_symbols()
 
+
+# =========================
+# HELPERS
+# =========================
 
 def round_num(x, digits=2):
     try:
@@ -115,10 +289,16 @@ def normalize_df(df):
     df = df.dropna(subset=required)
 
     if "time" in df.columns:
+        df["time"] = pd.to_datetime(df["time"], errors="coerce")
+        df = df.dropna(subset=["time"])
         df = df.sort_values("time")
 
     return df.reset_index(drop=True)
 
+
+# =========================
+# FETCH DATA
+# =========================
 
 def fetch_history(symbol):
     end = datetime.now()
@@ -137,11 +317,38 @@ def fetch_history(symbol):
     if len(df) < 120:
         raise ValueError(f"Not enough data: {len(df)} rows")
 
+    # Loại mã không có nến mới
+    if "time" in df.columns:
+        latest_date = df["time"].iloc[-1]
+
+        try:
+            latest_date = latest_date.tz_localize(None)
+        except Exception:
+            pass
+
+        stale_days = (pd.Timestamp.now().normalize() - latest_date.normalize()).days
+
+        if stale_days > MAX_STALE_DAYS:
+            raise ValueError(
+                f"Inactive/stale symbol. Latest candle: {latest_date.date()}, stale {stale_days} days"
+            )
+
+    # Loại mã thanh khoản quá thấp
+    avg_vol20 = df["volume"].tail(20).mean()
+    recent_volume_days = (df["volume"].tail(20) > 0).sum()
+
+    if avg_vol20 < MIN_AVG_VOL20:
+        raise ValueError(f"Low liquidity. avgVol20={avg_vol20:.0f}")
+
+    if recent_volume_days < MIN_RECENT_VOLUME_DAYS:
+        raise ValueError(f"Too few recent trading days. recentVolumeDays={recent_volume_days}")
+
     return df.tail(260).reset_index(drop=True)
 
 
 def is_rate_limit_error(error):
     msg = str(error).lower()
+
     keywords = [
         "rate limit",
         "request limit",
@@ -153,6 +360,7 @@ def is_rate_limit_error(error):
         "maximum",
         "api request limit"
     ]
+
     return any(k in msg for k in keywords)
 
 
@@ -160,6 +368,7 @@ def fetch_history_with_retry(symbol):
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             return fetch_history(symbol)
+
         except BaseException as e:
             if is_rate_limit_error(e):
                 print(f"Rate limit at {symbol}. Wait {RATE_LIMIT_WAIT_SECONDS}s.")
@@ -170,6 +379,10 @@ def fetch_history_with_retry(symbol):
 
     raise RuntimeError(f"Failed to fetch {symbol}")
 
+
+# =========================
+# SCORING
+# =========================
 
 def score_stock(symbol, df):
     close = df["close"]
@@ -268,6 +481,7 @@ def score_stock(symbol, df):
     except Exception:
         dry_volume_before_breakout = False
 
+    # Trend score /20
     trend = 0
     if above_ma20:
         trend += 4
@@ -283,6 +497,7 @@ def score_stock(symbol, df):
         trend += 1
     trend = min(trend, 20)
 
+    # Momentum score /15
     momentum = 0
     if rsi_healthy:
         momentum += 4
@@ -296,6 +511,7 @@ def score_stock(symbol, df):
         momentum += 1
     momentum = min(momentum, 15)
 
+    # Money score /20
     money = 0
     if volume_ratio20 > 1.2:
         money += 3
@@ -311,6 +527,7 @@ def score_stock(symbol, df):
         money += 2
     money = min(money, 20)
 
+    # Setup score /15
     setup = 0
     if breakout20:
         setup += 4
@@ -326,6 +543,7 @@ def score_stock(symbol, df):
         setup += 2
     setup = min(setup, 15)
 
+    # VIC Leap score /15
     vic_leap = 0
     if base_range60 <= 35 or base_range90 <= 45:
         vic_leap += 3
@@ -349,6 +567,7 @@ def score_stock(symbol, df):
         vic_leap += 1
     vic_leap = min(vic_leap, 15)
 
+    # Risk score /10
     risk = 10
     if rsi_hot:
         risk -= 3
@@ -364,9 +583,8 @@ def score_stock(symbol, df):
 
     relative_strength = 0
 
-    # T+ Score
+    # T+ score /15
     tplus = 0
-
     if above_ma20:
         tplus += 2
     if ma_turning_up:
@@ -383,7 +601,6 @@ def score_stock(symbol, df):
         tplus += 2
     if risk >= 7:
         tplus += 1
-
     tplus = min(tplus, 15)
 
     total_score = round(
@@ -396,12 +613,23 @@ def score_stock(symbol, df):
         relative_strength
     )
 
+    is_bluechip = symbol in BLUECHIP_SYMBOLS
+
+    is_penny = (
+        price <= PENNY_MAX_PRICE and
+        avg_vol20 >= PENNY_MIN_AVG_VOL20
+    )
+
     categories = []
 
     if total_score >= 85:
         categories.append("Top cơ hội")
     if tplus >= 10:
         categories.append("Lướt sóng T+")
+    if is_bluechip:
+        categories.append("Bluechip")
+    if is_penny:
+        categories.append("Penny")
     if vic_leap >= 11:
         categories.append("Bước nhảy VIC")
     if breakout20:
@@ -435,6 +663,12 @@ def score_stock(symbol, df):
     elif tplus >= 10:
         positives.append("Có tín hiệu T+ tiềm năng, phù hợp theo dõi điểm mua ngắn hạn.")
 
+    if is_bluechip:
+        positives.append("Thuộc nhóm Bluechip/vốn hóa lớn, thường có thanh khoản và độ quan tâm thị trường cao.")
+
+    if is_penny:
+        positives.append("Thuộc nhóm Penny có thanh khoản, phù hợp theo dõi sóng ngắn nhưng cần quản trị rủi ro chặt.")
+
     if above_ma20 and above_ma50 and above_ma100:
         positives.append("Giá nằm trên MA20, MA50 và MA100, cấu trúc xu hướng tích cực.")
 
@@ -443,31 +677,22 @@ def score_stock(symbol, df):
 
     if breakout20:
         positives.append("Giá breakout đỉnh 20 phiên.")
-
     if breakout60:
         positives.append("Giá breakout đỉnh 60 phiên.")
-
     if breakout120:
         positives.append("Giá breakout đỉnh 120 phiên.")
-
     if volume_ratio20 >= 1.8:
         positives.append(f"Volume đạt {volume_ratio20:.2f} lần trung bình 20 phiên.")
-
     if macd_cross_up:
         positives.append("MACD cắt lên Signal.")
-
     if hist_turn_positive:
         positives.append("MACD Histogram chuyển từ âm sang dương.")
-
     if rsi_recover50:
         positives.append("RSI hồi từ vùng yếu và vượt lại mốc 50.")
-
     if shakeout:
         positives.append("Có dấu hiệu rũ bỏ dưới MA50 rồi kéo lại nhanh.")
-
     if dry_volume_before_breakout:
         positives.append("Có dấu hiệu volume cạn trước đó rồi bùng lên.")
-
     if vic_leap >= 13:
         positives.append("VIC Leap rất cao: tích lũy, breakout, dòng tiền và động lượng cùng xác nhận.")
     elif vic_leap >= 11:
@@ -481,6 +706,8 @@ def score_stock(symbol, df):
         risks.append("Giá cách xa MA20, nên chờ kiểm định hoặc rung lắc.")
     if price < current_ma50:
         risks.append("Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận.")
+    if is_penny:
+        risks.append("Penny thường biến động mạnh, chỉ nên dùng tỷ trọng nhỏ và có điểm cắt lỗ rõ.")
 
     if not risks:
         risks.append("Chưa có rủi ro kỹ thuật lớn, nhưng vẫn cần quản trị điểm cắt lỗ.")
@@ -521,10 +748,12 @@ def score_stock(symbol, df):
     elif base_range60 <= 35:
         setup_name = "Tích lũy nền"
 
+    info = COMPANY_INFO.get(symbol, {})
+
     return {
         "symbol": symbol,
-        "name": symbol,
-        "industry": "Chưa phân ngành",
+        "name": info.get("name", symbol),
+        "industry": info.get("industry", "Chưa phân ngành"),
 
         "price": round_num(price),
         "volume": safe_float(volume.iloc[-1]),
@@ -570,6 +799,10 @@ def score_stock(symbol, df):
         "risks": risks
     }
 
+
+# =========================
+# SAVE + MAIN
+# =========================
 
 def save_results(results):
     results = sorted(results, key=lambda x: x.get("score", 0), reverse=True)
