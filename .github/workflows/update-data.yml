@@ -3,7 +3,7 @@ name: Update Stock Radar Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/50 * * * *"
 
 permissions:
   contents: write
