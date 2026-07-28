@@ -11,8 +11,8 @@ from vnstock.api.quote import Quote
 # CONFIG
 # =========================
 
-REQUEST_DELAY_SECONDS = 3.6
-RATE_LIMIT_WAIT_SECONDS = 65
+REQUEST_DELAY_SECONDS = 2.8
+RATE_LIMIT_WAIT_SECONDS = 50
 MAX_RETRIES = 1
 
 MAX_STALE_DAYS = 14
