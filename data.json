@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-29T17:35:00.648257Z",
-  "count": 222,
+  "updatedAt": "2026-07-29T18:47:53.989806Z",
+  "count": 224,
   "data": [
     {
       "symbol": "VPI",
@@ -5484,6 +5484,50 @@
       ]
     },
     {
+      "symbol": "PAN",
+      "name": "PAN",
+      "industry": "Chưa phân ngành",
+      "price": 20.6,
+      "volume": 227300.0,
+      "rsi": 20.75,
+      "macd": -0.6622,
+      "macdSignal": -0.5867,
+      "macdHistogram": -0.0754,
+      "ma20": 21.51,
+      "ma50": 22.68,
+      "ma100": 23.3,
+      "change5": -2.14,
+      "change20": -11.21,
+      "change60": -15.64,
+      "volumeRatio20": 0.71,
+      "volumeRatio50": 0.44,
+      "rs20": 0,
+      "rs60": 0,
+      "score": 11,
+      "tplusScore": 3,
+      "action": "THEO DÕI",
+      "setup": "Tích lũy nền",
+      "marketState": "Chưa xác nhận",
+      "scoreParts": {
+        "trend": 0,
+        "momentum": 0,
+        "money": 0,
+        "setup": 0,
+        "vicLeap": 3,
+        "tplus": 3,
+        "risk": 8,
+        "relativeStrength": 0
+      },
+      "categories": [
+        "Tích lũy nền",
+        "Tất cả mã"
+      ],
+      "positives": [],
+      "risks": [
+        "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận."
+      ]
+    },
+    {
       "symbol": "PHR",
       "name": "PHR",
       "industry": "Chưa phân ngành",
@@ -8797,6 +8841,53 @@
       ],
       "risks": [
         "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận."
+      ]
+    },
+    {
+      "symbol": "OGC",
+      "name": "OGC",
+      "industry": "Chưa phân ngành",
+      "price": 2.1,
+      "volume": 108500.0,
+      "rsi": 15.31,
+      "macd": -0.2153,
+      "macdSignal": -0.1719,
+      "macdHistogram": -0.0434,
+      "ma20": 2.5,
+      "ma50": 2.8,
+      "ma100": 2.89,
+      "change5": -2.33,
+      "change20": -26.83,
+      "change60": -30.23,
+      "volumeRatio20": 0.36,
+      "volumeRatio50": 0.2,
+      "rs20": 0,
+      "rs60": 0,
+      "score": 8,
+      "tplusScore": 3,
+      "action": "THEO DÕI",
+      "setup": "Theo dõi",
+      "marketState": "Chưa xác nhận",
+      "scoreParts": {
+        "trend": 0,
+        "momentum": 0,
+        "money": 0,
+        "setup": 0,
+        "vicLeap": 0,
+        "tplus": 3,
+        "risk": 8,
+        "relativeStrength": 0
+      },
+      "categories": [
+        "Penny",
+        "Tất cả mã"
+      ],
+      "positives": [
+        "Thuộc nhóm Penny có thanh khoản, phù hợp theo dõi sóng ngắn nhưng cần quản trị rủi ro chặt."
+      ],
+      "risks": [
+        "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận.",
+        "Penny thường biến động mạnh, chỉ nên dùng tỷ trọng nhỏ và có điểm cắt lỗ rõ."
       ]
     },
     {
