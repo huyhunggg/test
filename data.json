@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-01T15:05:48.651827Z",
-  "count": 224,
+  "updatedAt": "2026-08-01T16:21:21.780641Z",
+  "count": 225,
   "data": [
     {
       "symbol": "HVH",
@@ -4765,6 +4765,56 @@
       ],
       "risks": [
         "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận."
+      ]
+    },
+    {
+      "symbol": "DDG",
+      "name": "DDG",
+      "industry": "Chưa phân ngành",
+      "price": 1.0,
+      "volume": 456300.0,
+      "rsi": 37.5,
+      "macd": -0.0485,
+      "macdSignal": -0.0492,
+      "macdHistogram": 0.0007,
+      "ma20": 1.06,
+      "ma50": 1.04,
+      "ma100": 1.75,
+      "change5": 11.11,
+      "change20": -9.09,
+      "change60": -54.55,
+      "volumeRatio20": 0.43,
+      "volumeRatio50": 0.3,
+      "rs20": 0,
+      "rs60": 0,
+      "score": 17,
+      "tplusScore": 3,
+      "action": "THEO DÕI",
+      "setup": "Theo dõi",
+      "marketState": "Chưa xác nhận",
+      "scoreParts": {
+        "trend": 0,
+        "momentum": 6,
+        "money": 0,
+        "setup": 0,
+        "vicLeap": 3,
+        "tplus": 3,
+        "risk": 8,
+        "relativeStrength": 0
+      },
+      "categories": [
+        "Penny",
+        "MACD đảo chiều",
+        "Tất cả mã"
+      ],
+      "positives": [
+        "Thuộc nhóm Penny có thanh khoản, phù hợp theo dõi sóng ngắn nhưng cần quản trị rủi ro chặt.",
+        "MACD cắt lên Signal.",
+        "MACD Histogram chuyển từ âm sang dương."
+      ],
+      "risks": [
+        "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận.",
+        "Penny thường biến động mạnh, chỉ nên dùng tỷ trọng nhỏ và có điểm cắt lỗ rõ."
       ]
     },
     {
