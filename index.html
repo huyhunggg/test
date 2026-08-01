@@ -2,690 +2,763 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>VN Stock Radar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VN Stock Radar</title>
 
   <style>
     :root {
-      --bg: #f3f6fa;
+      --navy: #07152d;
+      --blue: #0969da;
+      --bg: #eef2f7;
       --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e5e7eb;
-      --primary: #071124;
-      --green: #16a34a;
-      --green-bg: #ecfdf5;
-      --orange-bg: #fff7ed;
-      --blue-bg: #f5faff;
-      --shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+      --line: #dce3ed;
+      --muted: #60708a;
+      --green: #087f5b;
+      --green-bg: #d9fae9;
+      --orange: #bd4b00;
+      --orange-bg: #fff0e1;
+      --red: #b42318;
+      --red-bg: #ffe8e7;
+      --yellow: #956800;
+      --yellow-bg: #fff7cc;
+      --light-blue: #e2f3ff;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: Inter, Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--navy);
       background: var(--bg);
-      color: var(--text);
+      font-size: 14px;
     }
 
-    .app {
-      padding: 16px;
+    .app { padding: 10px 12px; }
+
+    .topbar {
+      background: var(--card);
+      border-radius: 0 0 22px 22px;
+      padding: 10px 0 18px;
+      margin: -10px -12px 24px;
+      box-shadow: 0 1px 1px rgba(15, 23, 42, .03);
     }
 
-    .header {
-      background: rgba(255, 255, 255, 0.96);
-      border-radius: 24px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-      position: sticky;
-      top: 12px;
-      z-index: 10;
-    }
-
-    .top {
+    .head {
       display: flex;
+      align-items: start;
       justify-content: space-between;
-      gap: 16px;
-      align-items: center;
-      margin-bottom: 16px;
+      gap: 15px;
+      padding: 10px 12px 15px;
+      border-bottom: 1px solid var(--line);
     }
 
-    h1 {
-      margin: 0;
-      font-size: 24px;
-    }
-
-    .subtitle,
-    .live {
-      color: var(--muted);
-      font-size: 13px;
-    }
+    h1 { margin: 0; font-size: 24px; line-height: 1.1; }
+    .subtitle, .updated { color: var(--muted); font-size: 13px; }
+    .updated { text-align: right; }
 
     .tabs {
       display: flex;
       gap: 10px;
       overflow-x: auto;
-      padding-bottom: 12px;
+      padding: 0 12px;
+      margin-top: 0;
+      scrollbar-width: thin;
     }
 
     .tab {
-      border: 1px solid var(--border);
+      flex: 0 0 auto;
+      padding: 12px 17px;
+      border: 1px solid var(--line);
+      border-radius: 25px;
       background: white;
-      border-radius: 999px;
-      padding: 11px 16px;
-      font-weight: 800;
+      color: #111;
+      font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
     }
 
     .tab.active {
-      background: var(--primary);
       color: white;
+      background: var(--navy);
+      border-color: var(--navy);
     }
 
     .filters {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      grid-template-columns: 1.45fr .72fr .72fr .72fr .72fr;
       gap: 12px;
+      padding: 14px 12px 0;
     }
 
-    input,
-    select {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 13px;
-      font-size: 14px;
-      width: 100%;
+    input, select {
+      min-width: 0;
+      height: 46px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
       background: white;
+      font-size: 14px;
+      color: #1f2937;
+      outline: none;
     }
 
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(420px, 0.95fr);
-      gap: 24px;
-      margin-top: 24px;
+    input:focus, select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(9, 105, 218, .1);
     }
 
-    .cards {
+    .opportunity-note {
+      margin: 0 0 16px;
+      padding: 12px 15px;
+      border: 1px solid #b9dcff;
+      border-radius: 12px;
+      background: #f1f8ff;
+      color: #244a72;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .opportunity-note strong { color: var(--navy); }
+
+    .main {
       display: grid;
-      grid-template-columns: repeat(2, minmax(240px, 1fr));
+      grid-template-columns: minmax(600px, 1.08fr) minmax(500px, .92fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .stock-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(250px, 1fr));
       gap: 16px;
-      align-content: start;
+      max-height: calc(100vh - 260px);
+      overflow-y: auto;
+      padding-right: 4px;
     }
 
-    .card {
+    .stock-card {
       background: var(--card);
-      border-radius: 22px;
-      padding: 16px;
-      box-shadow: var(--shadow);
-      cursor: pointer;
       border: 1px solid transparent;
-      min-height: 230px;
+      border-radius: 20px;
+      padding: 16px 12px 14px;
+      cursor: pointer;
+      transition: .15s ease;
+      min-height: 266px;
     }
 
-    .card.active {
-      border-color: #0f172a;
+    .stock-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 22px rgba(15, 23, 42, .09);
     }
 
-    .head {
+    .stock-card.active {
+      border-color: var(--navy);
+      box-shadow: 0 5px 18px rgba(15, 23, 42, .08);
+    }
+
+    .card-head {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
-    }
-
-    .symbol {
-      font-size: 32px;
-      margin: 0;
-      letter-spacing: -0.08em;
-      font-weight: 950;
-      line-height: 1;
-    }
-
-    .company {
-      color: var(--muted);
-      margin-top: 6px;
-      line-height: 1.35;
-      font-size: 13px;
-    }
-
-    .badge {
-      background: #dcffe8;
-      color: #047857;
-      padding: 7px 11px;
-      border-radius: 999px;
-      font-weight: 900;
-      margin-bottom: 6px;
-      white-space: nowrap;
-      text-align: center;
-      font-size: 13px;
-    }
-
-    .badge.vic {
-      background: #e0f2fe;
-      color: #0369a1;
-    }
-
-    .bar {
-      height: 7px;
-      background: #edf2f7;
-      border-radius: 999px;
-      overflow: hidden;
-      margin: 12px 0;
-    }
-
-    .bar span {
-      display: block;
-      height: 100%;
-      background: var(--primary);
-    }
-
-    .action {
-      font-weight: 950;
-      font-size: 16px;
-      margin-bottom: 8px;
-    }
-
-    .desc {
-      color: #475569;
-      line-height: 1.45;
-      margin-bottom: 12px;
-      font-size: 13px;
-    }
-
-    .metrics,
-    .scores {
-      display: grid;
       gap: 8px;
+      align-items: flex-start;
     }
+
+    .symbol { margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -1px; }
+    .company { color: #59708f; margin-top: 3px; font-size: 13px; }
+
+    .score-wrap {
+      display: grid;
+      gap: 7px;
+      justify-items: end;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .score-pill { color: #087f5b; background: var(--green-bg); }
+    .tplus-pill { color: #0067a4; background: var(--light-blue); }
+
+    .progress { height: 7px; background: #edf2f7; border-radius: 9px; margin: 17px 0; overflow: hidden; }
+    .progress > i { display: block; height: 100%; background: var(--navy); }
+
+    .action { font-size: 17px; font-weight: 900; margin-bottom: 7px; }
+    .reason { color: #334c6d; line-height: 1.45; min-height: 38px; }
 
     .metrics {
+      display: grid;
       grid-template-columns: repeat(4, 1fr);
-      margin-bottom: 8px;
+      gap: 8px;
+      margin-top: 12px;
     }
 
-    .scores {
-      grid-template-columns: repeat(3, 1fr);
+    .metric {
+      min-width: 0;
+      background: #f2f8fd;
+      border-radius: 13px;
+      padding: 10px 9px;
     }
 
-    .box {
-      background: var(--blue-bg);
-      padding: 9px;
-      border-radius: 14px;
-      min-height: 50px;
-    }
+    .metric label { display: block; color: #53729a; font-size: 11px; margin-bottom: 4px; }
+    .metric b { font-size: 14px; color: var(--navy); }
 
-    .label {
-      color: var(--muted);
-      font-size: 11px;
-      margin-bottom: 4px;
-    }
-
-    .value {
-      font-weight: 900;
-      font-size: 13px;
-    }
-
-    .tags {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-    }
-
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
     .tag {
-      background: #f8fafc;
-      border: 1px solid #edf2f7;
-      padding: 5px 8px;
+      border: 1px solid #e1e8f1;
+      background: #f7fafc;
       border-radius: 999px;
-      color: #475569;
+      padding: 5px 9px;
       font-size: 11px;
+      color: #34506f;
     }
-
-    .tag.hot {
-      background: #ecfdf5;
-      color: #166534;
-    }
+    .tag.green { background: #e9fff2; color: #087f5b; border-color: #d3f6df; }
 
     .detail {
       background: white;
-      border-radius: 28px;
-      padding: 28px;
-      box-shadow: var(--shadow);
-      position: sticky;
-      top: 170px;
-      max-height: calc(100vh - 190px);
-      overflow: auto;
+      border-radius: 20px;
+      padding: 26px;
+      max-height: calc(100vh - 260px);
+      overflow-y: auto;
+      min-height: 600px;
     }
 
-    .detail-symbol {
-      font-size: 58px;
-      font-weight: 950;
-      letter-spacing: -0.08em;
-      margin: 0;
-      line-height: 1;
-    }
-
-    .section {
-      border-top: 1px solid var(--border);
-      margin-top: 20px;
-      padding-top: 20px;
-    }
-
-    .good,
-    .risk,
-    .neutral {
-      border-radius: 16px;
-      padding: 14px;
-      margin-bottom: 10px;
-      line-height: 1.45;
-    }
-
-    .good {
-      background: var(--green-bg);
-      color: #166534;
-    }
-
-    .risk {
-      background: var(--orange-bg);
-      color: #9a3412;
-    }
-
-    .neutral {
-      background: #f8fafc;
-      color: #334155;
-    }
-
-    .empty {
-      background: white;
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      padding: 40px;
-      color: var(--muted);
-      grid-column: 1 / -1;
+    .empty-detail {
+      min-height: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .detail-symbol { font-size: 58px; line-height: 1; margin: 0; letter-spacing: -2px; }
+    .detail-company { color: #52709a; margin-top: 8px; }
+
+    .price-box {
+      text-align: right;
+      min-width: 190px;
+      padding: 12px 15px;
+      background: #f2f8fd;
+      border-radius: 15px;
+    }
+
+    .price-label { color: #52709a; font-size: 12px; }
+    .price { font-size: 31px; font-weight: 900; margin-top: 3px; }
+    .price-change { margin-top: 5px; font-weight: 800; }
+    .price-time { color: var(--muted); font-size: 11px; margin-top: 6px; }
+
+    .up { color: var(--green); }
+    .down { color: var(--red); }
+    .flat { color: var(--muted); }
+
+    .section { padding: 22px 0; border-bottom: 1px solid var(--line); }
+    .section:last-child { border-bottom: 0; }
+    .section h3 { margin: 0 0 14px; font-size: 19px; }
+
+    .conclusion {
+      padding: 14px;
+      border-radius: 12px;
+      line-height: 1.6;
+      background: #f4f8fc;
+      color: #263f5c;
+    }
+
+    .conclusion strong { color: var(--navy); }
+
+    .component-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .component {
+      padding: 12px;
+      border-radius: 13px;
+      background: #f2f8fd;
+    }
+
+    .component label { display: block; color: #52709a; font-size: 11px; margin-bottom: 5px; }
+    .component b { font-size: 16px; }
+
+    .criteria {
+      display: grid;
+      gap: 9px;
+    }
+
+    .criterion {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--line);
+      padding: 11px 12px;
+      border-radius: 10px;
+      color: #314d6e;
+    }
+
+    .pass { color: var(--green); font-weight: 800; }
+    .fail { color: var(--red); font-weight: 800; }
+    .wait { color: var(--orange); font-weight: 800; }
+
+    .no-result {
+      grid-column: 1 / -1;
+      padding: 35px;
+      text-align: center;
+      color: var(--muted);
+      background: white;
+      border-radius: 18px;
     }
 
     @media (max-width: 1150px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .detail {
-        position: static;
-        max-height: none;
-      }
+      .main { grid-template-columns: 1fr; }
+      .stock-grid, .detail { max-height: none; }
+      .filters { grid-template-columns: repeat(2, 1fr); }
     }
 
-    @media (max-width: 760px) {
-      .app {
-        padding: 10px;
-      }
-
-      .filters {
-        grid-template-columns: 1fr;
-      }
-
-      .cards {
-        grid-template-columns: 1fr;
-      }
-
-      .metrics {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    @media (max-width: 620px) {
+      .app { padding: 8px; }
+      .topbar { margin-left: -8px; margin-right: -8px; }
+      .head, .detail-head { flex-direction: column; }
+      .updated, .price-box { text-align: left; }
+      .filters, .stock-grid { grid-template-columns: 1fr; }
+      .detail-symbol { font-size: 44px; }
+      .component-grid { grid-template-columns: repeat(2, 1fr); }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 
 <body>
-  <main class="app">
-    <section class="header">
-      <div class="top">
+  <div class="app">
+    <header class="topbar">
+      <div class="head">
         <div>
           <h1>VN Stock Radar</h1>
-          <div class="subtitle">
-            Quét cổ phiếu theo T+, Breakout, Pullback, Dòng tiền, MACD, RSI và mẫu “Bước nhảy VIC”
-          </div>
+          <div class="subtitle">Quét cơ hội theo T+, Breakout, Pullback, Dòng tiền, MACD, RSI và mẫu “Bước nhảy VIC”</div>
         </div>
-
-        <div class="live" id="updatedAt">Đang tải...</div>
+        <div class="updated" id="updated">Đang tải dữ liệu...</div>
       </div>
 
-      <div class="tabs" id="tabs"></div>
+      <div class="tabs" id="tabs">
+        <button class="tab" data-tab="top">Top cơ hội</button>
+        <button class="tab active" data-tab="tplus">Lướt sóng T+</button>
+        <button class="tab" data-tab="bluechip">Bluechip</button>
+        <button class="tab" data-tab="penny">Penny</button>
+        <button class="tab" data-tab="vic">Bước nhảy VIC</button>
+        <button class="tab" data-tab="breakout20">Breakout 20 phiên</button>
+        <button class="tab" data-tab="breakout60">Breakout 60 phiên</button>
+        <button class="tab" data-tab="breakout120">Breakout 120 phiên</button>
+        <button class="tab" data-tab="ma20">Pullback MA20</button>
+        <button class="tab" data-tab="ma50">Pullback MA50</button>
+        <button class="tab" data-tab="money">Dòng tiền mạnh</button>
+        <button class="tab" data-tab="macd">MACD đảo chiều</button>
+        <button class="tab" data-tab="rsi">RSI hồi phục</button>
+      </div>
 
       <div class="filters">
         <input id="search" placeholder="Tìm mã, tên công ty, ngành..." />
-
-        <select id="industry">
-          <option value="all">Tất cả ngành</option>
-        </select>
-
+        <select id="industry"><option value="">Tất cả ngành</option></select>
         <select id="action">
-          <option value="all">Tất cả hành động</option>
-          <option value="MUA TỪNG PHẦN">Mua từng phần</option>
-          <option value="CHỜ ĐIỂM MUA">Chờ điểm mua</option>
-          <option value="THEO DÕI">Theo dõi</option>
-          <option value="TRÁNH MUA ĐUỔI">Tránh mua đuổi</option>
+          <option value="">Tất cả hành động</option>
+          <option value="MUA">Mua / ưu tiên</option>
+          <option value="CHỜ">Chờ điểm mua</option>
+          <option value="TRÁNH">Tránh mua đuổi</option>
         </select>
-
         <select id="minScore">
           <option value="0">Điểm tối thiểu</option>
-          <option value="70">Từ 70</option>
-          <option value="80">Từ 80</option>
-          <option value="85">Từ 85</option>
-          <option value="90">Từ 90</option>
+          <option value="50">Từ 50 điểm</option>
+          <option value="60">Từ 60 điểm</option>
+          <option value="70">Từ 70 điểm</option>
         </select>
-
         <select id="sort">
           <option value="score">Điểm cao nhất</option>
-          <option value="tplus">T+ cao nhất</option>
-          <option value="vicLeap">Bước nhảy VIC</option>
-          <option value="money">Dòng tiền mạnh</option>
-          <option value="change20">Tăng 20 phiên</option>
+          <option value="tplus">Điểm T+ cao nhất</option>
+          <option value="rsi">RSI thấp đến cao</option>
+          <option value="price">Giá thấp đến cao</option>
         </select>
       </div>
-    </section>
+    </header>
 
-    <section class="layout">
-      <div class="cards" id="cards"></div>
+    <div id="topNote"></div>
+
+    <main class="main">
+      <section class="stock-grid" id="stockGrid"></section>
       <aside class="detail" id="detail"></aside>
-    </section>
-  </main>
+    </main>
+  </div>
 
   <script>
-const tabs = [
-  "Top cơ hội",
-  "Lướt sóng T+",
-  "Bluechip",
-  "Penny",
-  "Bước nhảy VIC",
-  "Breakout 20 phiên",
-  "Breakout 60 phiên",
-  "Breakout 120 phiên",
-  "Pullback MA20",
-  "Pullback MA50",
-  "Dòng tiền mạnh",
-  "MACD đảo chiều",
-  "RSI hồi phục",
-  "Tích lũy nền",
-  "An toàn",
-  "Tất cả mã"
-];
-
     let stocks = [];
-    let activeTab = "Lướt sóng T+";
+    let rootData = {};
+    let activeTab = "tplus";
     let selectedSymbol = null;
 
-    function formatNumber(n, digits = 2) {
-      if (n === null || n === undefined || Number.isNaN(Number(n))) return "-";
-      return Number(n).toLocaleString("vi-VN", { maximumFractionDigits: digits });
+    const pick = (o, keys, fallback = null) => {
+      for (const k of keys) if (o?.[k] !== undefined && o?.[k] !== null) return o[k];
+      return fallback;
+    };
+
+    const num = (v, fallback = 0) => {
+      const x = Number(String(v ?? "").replace(",", "."));
+      return Number.isFinite(x) ? x : fallback;
+    };
+
+    const text = (v, fallback = "") => v === undefined || v === null ? fallback : String(v);
+
+    const fmt = (v, decimals = 0) =>
+      Number.isFinite(num(v, NaN))
+        ? new Intl.NumberFormat("vi-VN", {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+          }).format(num(v))
+        : "--";
+
+    function getPrice(s) {
+      return num(pick(s, ["price", "close", "lastPrice", "currentPrice", "gia", "latest_price"]));
     }
 
-    function getTplus(s) {
-      return Number(s.scoreParts?.tplus || s.tplusScore || 0);
+    function priceText(s) {
+      const p = getPrice(s);
+      if (!p) return "--";
+      return p < 1000 ? fmt(p, 1) : fmt(p);
     }
 
-    function getVic(s) {
-      return Number(s.scoreParts?.vicLeap || 0);
+    function getScore(s) { return num(pick(s, ["score", "totalScore", "total_score", "total"])); }
+    function getTplus(s) { return num(pick(s, ["tplus", "tPlus", "tPlusScore", "t_plus_score"])); }
+    function getVIC(s) { return num(pick(s, ["vicLeap", "vic_leap", "vic", "vicScore"])); }
+    function getRSI(s) { return num(pick(s, ["rsi", "RSI"])); }
+    function getTrend(s) { return num(pick(s, ["trend", "trendScore", "trend_score"])); }
+    function getMomentum(s) { return num(pick(s, ["momentum", "momentumScore", "momentum_score"])); }
+    function getMoney(s) { return num(pick(s, ["money", "moneyScore", "money_score"])); }
+    function getSetup(s) { return num(pick(s, ["setup", "setupScore", "setup_score"])); }
+    function getRisk(s) { return num(pick(s, ["risk", "riskScore", "risk_score"])); }
+
+    function symbol(s) { return text(pick(s, ["symbol", "code", "ticker"]), "--"); }
+    function company(s) { return text(pick(s, ["company", "companyName", "name", "industry", "sector"]), "Chưa phân ngành"); }
+    function industry(s) { return text(pick(s, ["industry", "sector", "group"]), "Chưa phân ngành"); }
+    function actionText(s) { return text(pick(s, ["action", "conclusion", "recommendation", "signal"]), "CHỜ ĐIỂM MUA").toUpperCase(); }
+    function change(s) { return num(pick(s, ["changePercent", "pctChange", "percentChange", "change_pct"])); }
+
+    function tags(s) {
+      const raw = pick(s, ["tags", "categories", "signals"], []);
+      if (Array.isArray(raw)) return raw.map(String);
+      return text(raw).split(/[,|]/).map(x => x.trim()).filter(Boolean);
     }
 
-    function renderTabs() {
-      document.getElementById("tabs").innerHTML = tabs.map(tab => `
-        <button class="tab ${tab === activeTab ? "active" : ""}" onclick="setTab('${tab}')">
-          ${tab}
-        </button>
-      `).join("");
+    function priceTime(s) {
+      return pick(s, ["priceTime", "time", "updatedAt", "updated_at"], rootData.updatedAt || rootData.lastUpdated || "");
     }
 
-    function renderIndustryOptions() {
-      const select = document.getElementById("industry");
-      const current = select.value || "all";
-      const industries = [...new Set(stocks.map(x => x.industry).filter(Boolean))].sort();
-
-      select.innerHTML =
-        `<option value="all">Tất cả ngành</option>` +
-        industries.map(x => `<option value="${x}">${x}</option>`).join("");
-
-      if ([...select.options].some(o => o.value === current)) {
-        select.value = current;
-      }
+    function timeText(v) {
+      if (!v) return "Chưa có thời gian";
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? String(v) : d.toLocaleString("vi-VN");
     }
 
-    function getFiltered() {
-      const search = document.getElementById("search").value.toLowerCase().trim();
-      const industry = document.getElementById("industry").value;
-      const action = document.getElementById("action").value;
-      const minScore = Number(document.getElementById("minScore").value);
-      const sort = document.getElementById("sort").value;
+    function isAvoid(s) {
+      const a = actionText(s);
+      return a.includes("TRÁNH") || a.includes("QUÁ MUA") || getRSI(s) >= 75;
+    }
 
-      let data = stocks.filter(s => {
-        const categories = s.categories || [];
+    function topLevel(s) {
+      const score = getScore(s), t = getTplus(s), rsi = getRSI(s);
+      const strict =
+        score >= 65 && t >= 11 && getTrend(s) >= 12 &&
+        getMoney(s) >= 10 && getSetup(s) >= 10 &&
+        getVIC(s) >= 8 && getRisk(s) <= 8 &&
+        (rsi === 0 || (rsi >= 45 && rsi <= 70)) && !isAvoid(s);
 
-        const matchTab = activeTab === "Tất cả mã" || categories.includes(activeTab);
+      if (strict) return "TOP CƠ HỘI";
+      if (score >= 55 && t >= 10 && !isAvoid(s)) return "TIỀM NĂNG – CHỜ ĐIỂM MUA";
+      return "";
+    }
 
-        const matchSearch =
-          !search ||
-          String(s.symbol || "").toLowerCase().includes(search) ||
-          String(s.name || "").toLowerCase().includes(search) ||
-          String(s.industry || "").toLowerCase().includes(search);
+    function normalizeData(data) {
+      const list = Array.isArray(data) ? data : (data.stocks || data.data || data.items || data.results || []);
+      return Array.isArray(list) ? list.filter(x => symbol(x) !== "--") : [];
+    }
 
-        const matchIndustry = industry === "all" || s.industry === industry;
-        const matchAction = action === "all" || s.action === action;
-        const matchScore = Number(s.score || 0) >= minScore;
+    function matchesTab(s) {
+      const tg = tags(s).join(" ").toLowerCase();
+      const a = actionText(s).toLowerCase();
 
-        return matchTab && matchSearch && matchIndustry && matchAction && matchScore;
+      if (activeTab === "top") return Boolean(topLevel(s));
+      if (activeTab === "tplus") return getTplus(s) >= 9 || tg.includes("lướt sóng") || a.includes("t+");
+      if (activeTab === "bluechip") return tg.includes("bluechip");
+      if (activeTab === "penny") return tg.includes("penny");
+      if (activeTab === "vic") return getVIC(s) >= 7 || tg.includes("bước nhảy vic");
+      if (activeTab === "breakout20") return tg.includes("breakout 20");
+      if (activeTab === "breakout60") return tg.includes("breakout 60");
+      if (activeTab === "breakout120") return tg.includes("breakout 120");
+      if (activeTab === "ma20") return tg.includes("pullback ma20");
+      if (activeTab === "ma50") return tg.includes("pullback ma50");
+      if (activeTab === "money") return getMoney(s) >= 12 || tg.includes("dòng tiền");
+      if (activeTab === "macd") return tg.includes("macd");
+      if (activeTab === "rsi") return tg.includes("rsi");
+      return true;
+    }
+
+    function filteredStocks() {
+      const q = document.querySelector("#search").value.trim().toLowerCase();
+      const ind = document.querySelector("#industry").value;
+      const act = document.querySelector("#action").value;
+      const min = num(document.querySelector("#minScore").value);
+      const sort = document.querySelector("#sort").value;
+
+      const result = stocks.filter(s => {
+        const searchText = `${symbol(s)} ${company(s)} ${industry(s)}`.toLowerCase();
+        return matchesTab(s) &&
+          (!q || searchText.includes(q)) &&
+          (!ind || industry(s) === ind) &&
+          (!act || actionText(s).includes(act)) &&
+          getScore(s) >= min;
       });
 
-      data.sort((a, b) => {
-        if (sort === "score") return Number(b.score || 0) - Number(a.score || 0);
+      return result.sort((a, b) => {
         if (sort === "tplus") return getTplus(b) - getTplus(a);
-        if (sort === "vicLeap") return getVic(b) - getVic(a);
-        if (sort === "money") return Number(b.scoreParts?.money || 0) - Number(a.scoreParts?.money || 0);
-        if (sort === "change20") return Number(b.change20 || 0) - Number(a.change20 || 0);
-        return Number(b.score || 0) - Number(a.score || 0);
+        if (sort === "rsi") return getRSI(a) - getRSI(b);
+        if (sort === "price") return getPrice(a) - getPrice(b);
+        return getScore(b) - getScore(a);
       });
+    }
 
-      return data;
+    function renderTopNote(list) {
+      const el = document.querySelector("#topNote");
+      if (activeTab !== "top") return el.innerHTML = "";
+
+      const strict = list.filter(s => topLevel(s) === "TOP CƠ HỘI").length;
+      el.innerHTML = `
+        <div class="opportunity-note">
+          <strong>Tiêu chí “Top cơ hội”:</strong> tổng điểm ≥ 65, T+ ≥ 11/15, Trend ≥ 12,
+          Dòng tiền ≥ 10, Setup ≥ 10, VIC Leap ≥ 8, Risk ≤ 8; RSI ưu tiên 45–70 và
+          <strong>không có cảnh báo “Tránh mua đuổi”.</strong><br>
+          ${strict
+            ? `Hiện có <strong>${strict} mã</strong> đạt nhóm ưu tiên.`
+            : `Chưa có mã đạt toàn bộ điều kiện mua an toàn. Hệ thống đang hiển thị nhóm <strong>“Tiềm năng – chờ điểm mua”</strong> để theo dõi, thay vì để danh sách trống.`
+          }
+        </div>`;
     }
 
     function renderCards() {
-      const data = getFiltered();
-      const cards = document.getElementById("cards");
+      const list = filteredStocks();
+      renderTopNote(list);
 
-      if (!data.length) {
-        cards.innerHTML = `<div class="empty">Không có mã phù hợp bộ lọc hiện tại.</div>`;
+      if (!selectedSymbol || !list.some(s => symbol(s) === selectedSymbol)) {
+        selectedSymbol = list[0] ? symbol(list[0]) : null;
+      }
+
+      const grid = document.querySelector("#stockGrid");
+      if (!list.length) {
+        grid.innerHTML = `<div class="no-result">Không có mã phù hợp với bộ lọc hiện tại.</div>`;
         renderDetail(null);
         return;
       }
 
-      if (!selectedSymbol || !data.find(x => x.symbol === selectedSymbol)) {
-        selectedSymbol = data[0].symbol;
-      }
-
-      cards.innerHTML = data.map(s => {
-        const score = Number(s.score || 0);
-        const vicScore = getVic(s);
-        const tplusScore = getTplus(s);
+      grid.innerHTML = list.map(s => {
+        const sc = getScore(s), ch = change(s), a = actionText(s);
+        const isActive = symbol(s) === selectedSymbol;
+        const actionClass = isAvoid(s) ? "down" : a.includes("MUA") ? "up" : "flat";
 
         return `
-          <article class="card ${s.symbol === selectedSymbol ? "active" : ""}" onclick="selectStock('${s.symbol}')">
-            <div class="head">
+          <article class="stock-card ${isActive ? "active" : ""}" onclick="selectStock('${symbol(s)}')">
+            <div class="card-head">
               <div>
-                <h2 class="symbol">${s.symbol}</h2>
-                <div class="company">${s.name || s.symbol} · ${s.industry || "Chưa phân ngành"}</div>
+                <h2 class="symbol">${symbol(s)}</h2>
+                <div class="company">${company(s)}</div>
               </div>
-
-              <div>
-                <div class="badge">${score}/100</div>
-                <div class="badge vic">T+ ${tplusScore}/15</div>
+              <div class="score-wrap">
+                <span class="pill score-pill">${fmt(sc)}/100</span>
+                <span class="pill tplus-pill">T+ ${fmt(getTplus(s))}/15</span>
               </div>
             </div>
 
-            <div class="bar"><span style="width:${Math.min(score, 100)}%"></span></div>
+            <div class="progress"><i style="width:${Math.min(100, Math.max(0, sc))}%"></i></div>
 
-            <div class="action">${s.action || "THEO DÕI"}</div>
-
-            <div class="desc">
-              <b>${s.setup || "Theo dõi"}</b> ·
-              Giá ${formatNumber(s.price)} ·
-              RSI ${formatNumber(s.rsi)} ·
-              20 phiên ${formatNumber(s.change20)}% ·
-              Vol ${formatNumber(s.volumeRatio20)}x
+            <div class="action ${actionClass}">${a}</div>
+            <div class="reason">
+              Giá ${priceText(s)} · RSI ${fmt(getRSI(s), 2)} ·
+              20 phiên ${fmt(pick(s, ["change20", "change_20d", "return20"]), 2)}% ·
+              Vol ${fmt(pick(s, ["volumeRatio", "volRatio", "volume_ratio"]), 2)}x
             </div>
 
             <div class="metrics">
-              <div class="box">
-                <div class="label">Giá</div>
-                <div class="value">${formatNumber(s.price)}</div>
-              </div>
-
-              <div class="box">
-                <div class="label">RSI</div>
-                <div class="value">${formatNumber(s.rsi)}</div>
-              </div>
-
-              <div class="box">
-                <div class="label">T+</div>
-                <div class="value">${tplusScore}/15</div>
-              </div>
-
-              <div class="box">
-                <div class="label">VIC</div>
-                <div class="value">${vicScore}/15</div>
-              </div>
+              <div class="metric"><label>Giá</label><b>${priceText(s)}</b></div>
+              <div class="metric"><label>RSI</label><b>${fmt(getRSI(s), 2)}</b></div>
+              <div class="metric"><label>T+</label><b>${fmt(getTplus(s))}/15</b></div>
+              <div class="metric"><label>VIC</label><b>${fmt(getVIC(s))}/15</b></div>
             </div>
 
             <div class="tags">
-              ${(s.categories || []).slice(0, 3).map(c => `
-                <span class="tag ${c === "Bước nhảy VIC" || c === "Top cơ hội" || c === "Lướt sóng T+" ? "hot" : ""}">${c}</span>
-              `).join("")}
+              ${tags(s).slice(0, 4).map((t, i) => `<span class="tag ${i === 0 ? "green" : ""}">${t}</span>`).join("")}
             </div>
-          </article>
-        `;
+          </article>`;
       }).join("");
 
-      renderDetail(stocks.find(x => x.symbol === selectedSymbol));
+      renderDetail(stocks.find(s => symbol(s) === selectedSymbol));
+    }
+
+    function criterion(label, ok, pending = false) {
+      const cls = pending ? "wait" : ok ? "pass" : "fail";
+      const result = pending ? "Theo dõi" : ok ? "Đạt" : "Chưa đạt";
+      return `<div class="criterion"><span>${label}</span><span class="${cls}">${result}</span></div>`;
     }
 
     function renderDetail(s) {
-      const detail = document.getElementById("detail");
+      const el = document.querySelector("#detail");
 
       if (!s) {
-        detail.innerHTML = `<h2 class="detail-symbol">---</h2><div class="company">Chưa chọn mã</div>`;
+        el.innerHTML = `<div class="empty-detail">Chọn một mã ở danh sách để xem chi tiết giá,<br>điểm số và lý do đánh giá.</div>`;
         return;
       }
 
-      const tplusScore = getTplus(s);
-      const vicScore = getVic(s);
+      const ch = change(s);
+      const chClass = ch > 0 ? "up" : ch < 0 ? "down" : "flat";
+      const level = topLevel(s);
+      const action = actionText(s);
+      const isTop = level === "TOP CƠ HỘI";
+      const isPotential = level.includes("TIỀM NĂNG");
 
-      detail.innerHTML = `
-        <div class="head">
+      const explanation = isTop
+        ? "Mã đáp ứng bộ tiêu chí xu hướng, điểm T+, dòng tiền, setup và rủi ro. Vẫn cần quản trị vốn và xác nhận giá trước khi vào lệnh."
+        : isPotential
+          ? "Mã có nền tảng điểm số tốt nhưng chưa đủ điều kiện mua an toàn hoặc vẫn cần điểm vào tốt hơn."
+          : "Mã hiện chưa phù hợp nhóm cơ hội ưu tiên. Cần theo dõi thêm xu hướng giá, RSI, thanh khoản hoặc chờ pullback.";
+
+      el.innerHTML = `
+        <div class="detail-head">
           <div>
-            <h2 class="detail-symbol">${s.symbol}</h2>
-            <div class="company">${s.name || s.symbol} · ${s.industry || "Chưa phân ngành"}</div>
+            <h2 class="detail-symbol">${symbol(s)}</h2>
+            <div class="detail-company">${company(s)}</div>
           </div>
-          <div>
-            <div class="badge">${s.score}/100</div>
-            <div class="badge vic">T+ ${tplusScore}/15</div>
+
+          <div class="price-box">
+            <div class="price-label">GIÁ HIỆN TẠI</div>
+            <div class="price">${priceText(s)}</div>
+            <div class="price-change ${chClass}">${ch > 0 ? "+" : ""}${fmt(ch, 2)}%</div>
+            <div class="price-time">Cập nhật: ${timeText(priceTime(s))}</div>
           </div>
         </div>
 
-        <div class="bar"><span style="width:${Math.min(s.score, 100)}%"></span></div>
-
-        <div class="section">
+        <section class="section">
           <h3>Kết luận</h3>
-          <div class="desc">
-            <b>${s.action || "THEO DÕI"}</b> · Setup: <b>${s.setup || "Theo dõi"}</b> ·
-            Market state: ${s.marketState || "-"}.
-            Điểm VIC Leap: <b>${vicScore}/15</b> ·
-            Điểm T+: <b>${tplusScore}/15</b>.
+          <div class="conclusion">
+            <strong class="${isTop ? "up" : isPotential ? "wait" : isAvoid(s) ? "down" : ""}">
+              ${isTop ? "TOP CƠ HỘI" : isPotential ? "TIỀM NĂNG – CHỜ ĐIỂM MUA" : action}
+            </strong><br>
+            ${explanation}<br><br>
+            Setup: <strong>${text(pick(s, ["setupName", "setup_name", "setup"]), "Chưa xác định")}</strong> ·
+            Market state: <strong>${text(pick(s, ["marketState", "market_state", "trendName"]), "Chưa xác định")}</strong> ·
+            Điểm VIC Leap: <strong>${fmt(getVIC(s))}/15</strong> ·
+            Điểm T+: <strong>${fmt(getTplus(s))}/15</strong>
           </div>
-        </div>
+        </section>
 
-        <div class="section">
+        <section class="section">
           <h3>Điểm thành phần</h3>
-          <div class="scores">
-            <div class="box"><div class="label">Trend</div><div class="value">${s.scoreParts?.trend ?? "-"}</div></div>
-            <div class="box"><div class="label">Momentum</div><div class="value">${s.scoreParts?.momentum ?? "-"}</div></div>
-            <div class="box"><div class="label">Money</div><div class="value">${s.scoreParts?.money ?? "-"}</div></div>
-            <div class="box"><div class="label">Setup</div><div class="value">${s.scoreParts?.setup ?? "-"}</div></div>
-            <div class="box"><div class="label">VIC Leap</div><div class="value">${vicScore}</div></div>
-            <div class="box"><div class="label">T+</div><div class="value">${tplusScore}</div></div>
-            <div class="box"><div class="label">Risk</div><div class="value">${s.scoreParts?.risk ?? "-"}</div></div>
+          <div class="component-grid">
+            <div class="component"><label>Trend</label><b>${fmt(getTrend(s))}</b></div>
+            <div class="component"><label>Momentum</label><b>${fmt(getMomentum(s))}</b></div>
+            <div class="component"><label>Money</label><b>${fmt(getMoney(s))}</b></div>
+            <div class="component"><label>Setup</label><b>${fmt(getSetup(s))}</b></div>
+            <div class="component"><label>VIC Leap</label><b>${fmt(getVIC(s))}</b></div>
+            <div class="component"><label>T+</label><b>${fmt(getTplus(s))}</b></div>
+            <div class="component"><label>Risk</label><b>${fmt(getRisk(s))}</b></div>
+            <div class="component"><label>Tổng điểm</label><b>${fmt(getScore(s))}/100</b></div>
           </div>
-        </div>
+        </section>
 
-        <div class="section">
+        <section class="section">
           <h3>Chỉ báo chính</h3>
-          <div class="scores">
-            <div class="box"><div class="label">MA20</div><div class="value">${formatNumber(s.ma20)}</div></div>
-            <div class="box"><div class="label">MA50</div><div class="value">${formatNumber(s.ma50)}</div></div>
-            <div class="box"><div class="label">MA100</div><div class="value">${formatNumber(s.ma100)}</div></div>
-            <div class="box"><div class="label">MACD</div><div class="value">${formatNumber(s.macd)}</div></div>
-            <div class="box"><div class="label">Signal</div><div class="value">${formatNumber(s.macdSignal)}</div></div>
-            <div class="box"><div class="label">Hist</div><div class="value">${formatNumber(s.macdHistogram)}</div></div>
+          <div class="component-grid">
+            <div class="component"><label>MA20</label><b>${fmt(pick(s, ["ma20", "MA20"]), 2)}</b></div>
+            <div class="component"><label>MA50</label><b>${fmt(pick(s, ["ma50", "MA50"]), 2)}</b></div>
+            <div class="component"><label>MA100</label><b>${fmt(pick(s, ["ma100", "MA100"]), 2)}</b></div>
+            <div class="component"><label>RSI</label><b>${fmt(getRSI(s), 2)}</b></div>
+            <div class="component"><label>MACD</label><b>${fmt(pick(s, ["macd", "MACD"]), 3)}</b></div>
+            <div class="component"><label>Signal</label><b>${fmt(pick(s, ["signal", "macdSignal", "macd_signal"]), 3)}</b></div>
           </div>
-        </div>
+        </section>
 
-        <div class="section">
-          <h3>Tín hiệu tích cực</h3>
-          ${(s.positives || []).length
-            ? s.positives.map(x => `<div class="good">✅ ${x}</div>`).join("")
-            : `<div class="neutral">Chưa có tín hiệu nổi bật.</div>`
-          }
-        </div>
-
-        <div class="section">
-          <h3>Rủi ro cần lưu ý</h3>
-          ${(s.risks || []).length
-            ? s.risks.map(x => `<div class="risk">⚠️ ${x}</div>`).join("")
-            : `<div class="neutral">Chưa ghi nhận rủi ro kỹ thuật lớn.</div>`
-          }
-        </div>
+        <section class="section">
+          <h3>Kiểm tra tiêu chí Top cơ hội</h3>
+          <div class="criteria">
+            ${criterion("Tổng điểm từ 65/100", getScore(s) >= 65)}
+            ${criterion("Điểm T+ từ 11/15", getTplus(s) >= 11)}
+            ${criterion("Trend từ 12 điểm", getTrend(s) >= 12)}
+            ${criterion("Dòng tiền từ 10 điểm", getMoney(s) >= 10)}
+            ${criterion("Setup từ 10 điểm", getSetup(s) >= 10)}
+            ${criterion("VIC Leap từ 8/15", getVIC(s) >= 8)}
+            ${criterion("Risk không quá 8", getRisk(s) <= 8)}
+            ${criterion("RSI trong vùng 45–70", getRSI(s) >= 45 && getRSI(s) <= 70, getRSI(s) === 0)}
+            ${criterion("Không thuộc trạng thái Tránh mua đuổi", !isAvoid(s))}
+          </div>
+        </section>
       `;
     }
 
-    function setTab(tab) {
-      activeTab = tab;
-      renderTabs();
+    function selectStock(sym) {
+      selectedSymbol = sym;
       renderCards();
     }
 
-    function selectStock(symbol) {
-      selectedSymbol = symbol;
-      renderCards();
+    function populateIndustries() {
+      const select = document.querySelector("#industry");
+      const current = select.value;
+      const values = [...new Set(stocks.map(industry).filter(Boolean))].sort((a, b) => a.localeCompare(b, "vi"));
+      select.innerHTML = `<option value="">Tất cả ngành</option>` + values.map(v => `<option value="${v}">${v}</option>`).join("");
+      select.value = current;
     }
 
     async function loadData() {
       try {
-        const res = await fetch("./data.json?t=" + Date.now());
-        const json = await res.json();
+        const response = await fetch(`data.json?t=${Date.now()}`);
+        if (!response.ok) throw new Error("Không tải được data.json");
 
-        stocks = json.data || [];
+        rootData = await response.json();
+        stocks = normalizeData(rootData);
 
-        const updated = json.updatedAt
-          ? new Date(json.updatedAt).toLocaleString("vi-VN")
-          : "Không rõ";
+        document.querySelector("#updated").innerHTML =
+          `Cập nhật: ${timeText(rootData.updatedAt || rootData.lastUpdated || rootData.time)} · ${stocks.length} mã`;
 
-        document.getElementById("updatedAt").textContent =
-          `Cập nhật: ${updated} · ${stocks.length} mã`;
-
-        renderIndustryOptions();
+        populateIndustries();
         renderCards();
       } catch (err) {
         console.error(err);
-        document.getElementById("updatedAt").textContent = "Không tải được data.json";
+        document.querySelector("#updated").textContent = "Không thể tải dữ liệu";
+        document.querySelector("#stockGrid").innerHTML =
+          `<div class="no-result">Không đọc được file <strong>data.json</strong>. Hãy kiểm tra tên file và vị trí file.</div>`;
       }
     }
 
-    ["search", "industry", "action", "minScore", "sort"].forEach(id => {
-      document.getElementById(id).addEventListener("input", renderCards);
-      document.getElementById(id).addEventListener("change", renderCards);
+    document.querySelectorAll(".tab").forEach(button => {
+      button.addEventListener("click", () => {
+        activeTab = button.dataset.tab;
+        document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+        button.classList.add("active");
+        selectedSymbol = null;
+        renderCards();
+      });
     });
 
-    renderTabs();
+    ["search", "industry", "action", "minScore", "sort"].forEach(id => {
+      document.querySelector(`#${id}`).addEventListener(id === "search" ? "input" : "change", () => {
+        selectedSymbol = null;
+        renderCards();
+      });
+    });
+
     loadData();
     setInterval(loadData, 60000);
   </script>
