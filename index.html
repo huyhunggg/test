@@ -258,7 +258,7 @@ function detail(x){
   <div class="component"><small>Risk / Reward đến T2</small><b>${bt.rr}</b></div>
   <div class="component"><small>Vị trí so với MA20</small><b>${bt.distance}</b></div>
   <div class="component"><small>Khối lượng / TB20</small><b>${fmt(vr(x),2)}x</b></div></div>
-  <div class="summary"><b>${st[0}:</b> ${st[2]}<br><br><b>Cách xử lý target:</b> Khi đạt Target 1, cân nhắc chốt một phần và dời stop-loss về giá vốn. Target chỉ là vùng kỹ thuật tham khảo, không phải mức giá chắc chắn đạt.</div></section>
+  <div class="summary"><b>${st[0]}:</b> ${st[2]}<br><br><b>Cách xử lý target:</b> Khi đạt Target 1, cân nhắc chốt một phần và dời stop-loss về giá vốn. Target chỉ là vùng kỹ thuật tham khảo, không phải mức giá chắc chắn đạt.</div></section>
 
   <section class="section"><h3>Kết luận</h3><div class="summary"><b class="${cls(level(x)||act(x))}">${level(x)||act(x)}</b><br><br>
   Setup: <b>${esc(s(pick(x,["setup","setupName"]),"Theo dõi"))}</b> · Market state: <b>${esc(s(pick(x,["marketState","market_state"]),"Chưa xác nhận"))}</b> · Tổng điểm: <b>${fmt(score(x))}/100</b> · T+: <b>${fmt(tp(x))}/15</b></div></section>
