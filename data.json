@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-06T11:11:36.458932Z",
-  "count": 223,
+  "updatedAt": "2026-08-06T13:07:25.402257Z",
+  "count": 224,
   "data": [
     {
       "symbol": "HII",
@@ -8373,6 +8373,53 @@
       "risks": [
         "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận.",
         "Penny thường biến động mạnh, chỉ nên dùng tỷ trọng nhỏ và có điểm cắt lỗ rõ."
+      ]
+    },
+    {
+      "symbol": "QNS",
+      "name": "Đường Quảng Ngãi",
+      "industry": "Thực phẩm",
+      "price": 47.3,
+      "volume": 38500.0,
+      "rsi": 26.92,
+      "macd": -0.3851,
+      "macdSignal": -0.3042,
+      "macdHistogram": -0.0809,
+      "ma20": 47.83,
+      "ma50": 48.22,
+      "ma100": 47.35,
+      "change5": -0.21,
+      "change20": -3.27,
+      "change60": -3.47,
+      "volumeRatio20": 0.38,
+      "volumeRatio50": 0.35,
+      "rs20": 0,
+      "rs60": 0,
+      "score": 11,
+      "tplusScore": 3,
+      "action": "THEO DÕI",
+      "setup": "Tích lũy nền",
+      "marketState": "Chưa xác nhận",
+      "scoreParts": {
+        "trend": 0,
+        "momentum": 0,
+        "money": 0,
+        "setup": 0,
+        "vicLeap": 3,
+        "tplus": 3,
+        "risk": 8,
+        "relativeStrength": 0
+      },
+      "categories": [
+        "Bluechip",
+        "Tích lũy nền",
+        "Tất cả mã"
+      ],
+      "positives": [
+        "Thuộc nhóm Bluechip/vốn hóa lớn, thường có thanh khoản và độ quan tâm thị trường cao."
+      ],
+      "risks": [
+        "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận."
       ]
     },
     {
