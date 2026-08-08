@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-08T21:49:49.676308Z",
-  "count": 225,
+  "updatedAt": "2026-08-08T22:59:26.309382Z",
+  "count": 224,
   "data": [
     {
       "symbol": "VNM",
@@ -5982,54 +5982,6 @@
       ],
       "positives": [
         "Volume đạt 2.19 lần trung bình 20 phiên."
-      ],
-      "risks": [
-        "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận."
-      ]
-    },
-    {
-      "symbol": "QNS",
-      "name": "Đường Quảng Ngãi",
-      "industry": "Thực phẩm",
-      "price": 47.0,
-      "volume": 178200.0,
-      "rsi": 25.0,
-      "macd": -0.3911,
-      "macdSignal": -0.3216,
-      "macdHistogram": -0.0696,
-      "ma20": 47.75,
-      "ma50": 48.21,
-      "ma100": 47.36,
-      "change5": -0.42,
-      "change20": -3.09,
-      "change60": -3.49,
-      "volumeRatio20": 1.79,
-      "volumeRatio50": 1.59,
-      "rs20": 0,
-      "rs60": 0,
-      "score": 24,
-      "tplusScore": 5,
-      "action": "THEO DÕI",
-      "setup": "Tích lũy nền",
-      "marketState": "Chưa xác nhận",
-      "scoreParts": {
-        "trend": 0,
-        "momentum": 0,
-        "money": 12,
-        "setup": 0,
-        "vicLeap": 4,
-        "tplus": 5,
-        "risk": 8,
-        "relativeStrength": 0
-      },
-      "categories": [
-        "Bluechip",
-        "Tích lũy nền",
-        "Tất cả mã"
-      ],
-      "positives": [
-        "Thuộc nhóm Bluechip/vốn hóa lớn, thường có thanh khoản và độ quan tâm thị trường cao.",
-        "Có dấu hiệu volume cạn trước đó rồi bùng lên."
       ],
       "risks": [
         "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận."
