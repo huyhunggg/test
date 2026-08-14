@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-14T00:07:08.871473Z",
-  "count": 224,
+  "updatedAt": "2026-08-14T01:32:35.871017Z",
+  "count": 222,
   "data": [
     {
       "symbol": "DGW",
@@ -749,7 +749,7 @@
       "name": "Vinhomes",
       "industry": "Bất động sản",
       "price": 71.8,
-      "volume": 7785200.0,
+      "volume": 7812315.0,
       "rsi": 65.53,
       "macd": 0.5554,
       "macdSignal": 0.3978,
@@ -761,7 +761,7 @@
       "change20": 0.56,
       "change60": -6.68,
       "volumeRatio20": 1.22,
-      "volumeRatio50": 1.46,
+      "volumeRatio50": 1.47,
       "rs20": 0,
       "rs60": 0,
       "score": 48,
@@ -2615,7 +2615,7 @@
       "name": "Petrolimex",
       "industry": "Dầu khí",
       "price": 35.6,
-      "volume": 2349400.0,
+      "volume": 2356983.0,
       "rsi": 63.2,
       "macd": 0.3783,
       "macdSignal": -0.1771,
@@ -2981,7 +2981,7 @@
       "name": "FOC",
       "industry": "Chưa phân ngành",
       "price": 62.4,
-      "volume": 21800.0,
+      "volume": 22075.0,
       "rsi": 56.1,
       "macd": 0.3287,
       "macdSignal": 0.2826,
@@ -2992,7 +2992,7 @@
       "change5": -3.14,
       "change20": 0.52,
       "change60": 5.67,
-      "volumeRatio20": 0.43,
+      "volumeRatio20": 0.44,
       "volumeRatio50": 0.61,
       "rs20": 0,
       "rs60": 0,
@@ -3079,7 +3079,7 @@
       "name": "MB Bank",
       "industry": "Ngân hàng",
       "price": 20.15,
-      "volume": 11662400.0,
+      "volume": 11733683.0,
       "rsi": 74.81,
       "macd": 0.1532,
       "macdSignal": -0.0142,
@@ -3091,7 +3091,7 @@
       "change20": 0.15,
       "change60": 1.46,
       "volumeRatio20": 0.78,
-      "volumeRatio50": 0.87,
+      "volumeRatio50": 0.88,
       "rs20": 0,
       "rs60": 0,
       "score": 35,
@@ -3133,7 +3133,7 @@
       "name": "Masan Consumer",
       "industry": "Tiêu dùng",
       "price": 136.9,
-      "volume": 292000.0,
+      "volume": 293472.0,
       "rsi": 61.88,
       "macd": 0.7273,
       "macdSignal": 0.8894,
@@ -3806,7 +3806,7 @@
       "name": "Lọc hóa dầu Bình Sơn",
       "industry": "Dầu khí",
       "price": 26.5,
-      "volume": 9703200.0,
+      "volume": 9713811.0,
       "rsi": 71.88,
       "macd": 0.3224,
       "macdSignal": 0.0304,
@@ -3962,7 +3962,7 @@
       "name": "Đạm Phú Mỹ",
       "industry": "Phân bón",
       "price": 21.9,
-      "volume": 2360400.0,
+      "volume": 2365269.0,
       "rsi": 59.49,
       "macd": 0.0528,
       "macdSignal": -0.0375,
@@ -5966,7 +5966,7 @@
       "name": "TNG",
       "industry": "Chưa phân ngành",
       "price": 17.3,
-      "volume": 274000.0,
+      "volume": 274226.0,
       "rsi": 65.46,
       "macd": -0.0365,
       "macdSignal": -0.1659,
@@ -5978,7 +5978,7 @@
       "change20": 2.91,
       "change60": -3.08,
       "volumeRatio20": 0.6,
-      "volumeRatio50": 0.54,
+      "volumeRatio50": 0.55,
       "rs20": 0,
       "rs60": 0,
       "score": 27,
@@ -6266,56 +6266,6 @@
       "risks": [
         "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận.",
         "Penny thường biến động mạnh, chỉ nên dùng tỷ trọng nhỏ và có điểm cắt lỗ rõ."
-      ]
-    },
-    {
-      "symbol": "IDC",
-      "name": "IDICO",
-      "industry": "Bất động sản KCN",
-      "price": 34.2,
-      "volume": 1106100.0,
-      "rsi": 56.92,
-      "macd": -0.1351,
-      "macdSignal": -0.4746,
-      "macdHistogram": 0.3395,
-      "ma20": 33.0,
-      "ma50": 34.8,
-      "ma100": 37.36,
-      "change5": 4.59,
-      "change20": 2.61,
-      "change60": -11.33,
-      "volumeRatio20": 0.98,
-      "volumeRatio50": 0.98,
-      "rs20": 0,
-      "rs60": 0,
-      "score": 27,
-      "tplusScore": 11,
-      "action": "CHỜ ĐIỂM MUA",
-      "setup": "T+ tiềm năng",
-      "marketState": "Chưa xác nhận",
-      "scoreParts": {
-        "trend": 4,
-        "momentum": 8,
-        "money": 0,
-        "setup": 2,
-        "vicLeap": 5,
-        "tplus": 11,
-        "risk": 8,
-        "relativeStrength": 0
-      },
-      "categories": [
-        "Lướt sóng T+",
-        "Pullback MA20",
-        "RSI hồi phục",
-        "Tích lũy nền",
-        "Tất cả mã"
-      ],
-      "positives": [
-        "Có tín hiệu T+ tiềm năng, phù hợp theo dõi điểm mua ngắn hạn.",
-        "RSI hồi từ vùng yếu và vượt lại mốc 50."
-      ],
-      "risks": [
-        "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận."
       ]
     },
     {
@@ -7933,7 +7883,7 @@
       "name": "BFC",
       "industry": "Chưa phân ngành",
       "price": 47.5,
-      "volume": 88700.0,
+      "volume": 88976.0,
       "rsi": 58.52,
       "macd": -0.7855,
       "macdSignal": -0.9922,
@@ -8366,54 +8316,6 @@
       ],
       "risks": [
         "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận."
-      ]
-    },
-    {
-      "symbol": "NDN",
-      "name": "NDN",
-      "industry": "Chưa phân ngành",
-      "price": 8.9,
-      "volume": 278700.0,
-      "rsi": 40.0,
-      "macd": -0.2998,
-      "macdSignal": -0.3334,
-      "macdHistogram": 0.0336,
-      "ma20": 9.24,
-      "ma50": 10.1,
-      "ma100": 10.28,
-      "change5": -3.26,
-      "change20": -12.75,
-      "change60": -16.82,
-      "volumeRatio20": 1.71,
-      "volumeRatio50": 1.73,
-      "rs20": 0,
-      "rs60": 0,
-      "score": 21,
-      "tplusScore": 5,
-      "action": "THEO DÕI",
-      "setup": "Tích lũy nền",
-      "marketState": "Chưa xác nhận",
-      "scoreParts": {
-        "trend": 0,
-        "momentum": 0,
-        "money": 10,
-        "setup": 0,
-        "vicLeap": 3,
-        "tplus": 5,
-        "risk": 8,
-        "relativeStrength": 0
-      },
-      "categories": [
-        "Penny",
-        "Tích lũy nền",
-        "Tất cả mã"
-      ],
-      "positives": [
-        "Thuộc nhóm Penny có thanh khoản, phù hợp theo dõi sóng ngắn nhưng cần quản trị rủi ro chặt."
-      ],
-      "risks": [
-        "Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận.",
-        "Penny thường biến động mạnh, chỉ nên dùng tỷ trọng nhỏ và có điểm cắt lỗ rõ."
       ]
     },
     {
