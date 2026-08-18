@@ -6,297 +6,1225 @@
   <title>VN Stock Radar</title>
 
   <style>
-    :root{
-      --navy:#07152d;--blue:#086ed1;--bg:#edf2f7;--card:#fff;--line:#dce4ee;
-      --muted:#60708b;--green:#087f5b;--greenBg:#d9fae8;--red:#bd251c;
-      --redBg:#ffe9e7;--orange:#ba5000;--orangeBg:#fff0df;--sky:#006dac;
-      --skyBg:#e2f3ff;
+    :root {
+      --navy: #07152d;
+      --blue: #0b6fd3;
+      --bg: #edf2f7;
+      --card: #ffffff;
+      --line: #dce4ee;
+      --muted: #60708b;
+      --green: #087f5b;
+      --green-bg: #d9fae8;
+      --red: #bd251c;
+      --orange: #ba5000;
+      --sky: #006dac;
+      --sky-bg: #e2f3ff;
     }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--navy);font:14px Arial,Helvetica,sans-serif}
-    .app{padding:10px 12px 24px}
-    .topbar{background:#fff;margin:-10px -12px 20px;padding:10px 12px 18px;border-radius:0 0 22px 22px}
-    .head{display:flex;justify-content:space-between;gap:16px;padding:10px 0 15px;border-bottom:1px solid var(--line)}
-    h1{font-size:24px;margin:0}.subtitle,.updated{font-size:12px;color:var(--muted);margin-top:5px}.updated{text-align:right}
-    .tabs{display:flex;gap:9px;overflow-x:auto;padding-top:10px}
-    .tab{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:999px;padding:11px 16px;font-weight:700;cursor:pointer}
-    .tab.active{background:var(--navy);border-color:var(--navy);color:#fff}
-    .filters{display:grid;grid-template-columns:1.5fr .8fr .8fr .7fr .8fr;gap:11px;padding-top:13px}
-    input,select{height:45px;border:1px solid var(--line);border-radius:11px;padding:0 12px;background:#fff;color:#1e293b;outline:none}
-    input:focus,select:focus{border-color:var(--blue)}
-    .notice{display:none;margin-bottom:16px;padding:12px 14px;background:#f1f8ff;border:1px solid #b8dcff;border-radius:12px;color:#294b70;line-height:1.55}
-    .notice.show{display:block}
-    .layout{display:grid;grid-template-columns:minmax(560px,1.08fr) minmax(500px,.92fr);gap:18px;align-items:start}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(250px,1fr));gap:16px;max-height:calc(100vh - 265px);overflow-y:auto;padding:1px 5px 8px 1px}
-    .card{background:#fff;border:1px solid transparent;border-radius:20px;padding:16px 12px 14px;min-height:266px;cursor:pointer;transition:.15s}
-    .card:hover{transform:translateY(-2px);box-shadow:0 8px 22px #0f172a18}.card.active{border-color:var(--navy)}
-    .cardHead,.detailHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-    .symbol{font-size:32px;font-weight:900;letter-spacing:-1px;margin:0}.company{margin-top:4px;color:#5c7595;font-size:12px}
-    .pills{display:grid;gap:7px;justify-items:end}.pill{padding:7px 12px;border-radius:999px;font-weight:800;white-space:nowrap}
-    .score{background:var(--greenBg);color:var(--green)}.tplus{background:var(--skyBg);color:var(--sky)}
-    .progress{height:7px;border-radius:10px;background:#edf2f7;overflow:hidden;margin:17px 0}.progress i{height:100%;display:block;background:var(--navy)}
-    .action{font-size:16px;font-weight:900;margin-bottom:7px}.up{color:var(--green)}.down{color:var(--red)}.wait{color:var(--orange)}.neutral{color:#38516e}
-    .reason{color:#365170;line-height:1.45;min-height:38px}
-    .metrics,.components{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
-    .metric,.component{background:#f1f7fc;border-radius:12px;padding:10px 8px}.metric small,.component small{display:block;color:#537298;font-size:10px;margin-bottom:4px}.metric b,.component b{font-size:14px}
-    .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.tag{font-size:10px;padding:5px 8px;border-radius:999px;border:1px solid #e0e8f1;background:#f7fafc;color:#38536f}
-    .detail{background:#fff;border-radius:20px;padding:25px;min-height:600px;max-height:calc(100vh - 265px);overflow-y:auto}
-    .empty{min-height:520px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);line-height:1.6}
-    .detailSymbol{font-size:56px;line-height:1;margin:0;letter-spacing:-2px}.detailCompany{color:#527099;margin-top:8px}
-    .priceBox{min-width:195px;text-align:right;background:#f1f7fc;border-radius:14px;padding:12px 15px}.priceBox small{color:#527099;font-size:10px;font-weight:700}.price{font-size:31px;font-weight:900;margin-top:4px}.time{font-size:10px;color:var(--muted);margin-top:7px}
-    .section{padding:21px 0;border-bottom:1px solid var(--line)}.section:last-child{border:0}.section h3{font-size:18px;margin:0 0 13px}
-    .components{grid-template-columns:repeat(3,1fr);margin:0}.component{padding:12px}.component b{font-size:15px}
-    .summary{background:#f2f8fd;border-radius:12px;padding:13px;line-height:1.6;color:#304a68;margin-top:12px}
-    .criteria{display:grid;gap:8px}.criterion{display:flex;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:10px;padding:10px 11px;color:#365170}
-    ul{margin:0;padding-left:19px;line-height:1.7}.positive li{color:#176847}.risks li{color:#a34321}
-    .noResult{grid-column:1/-1;text-align:center;padding:35px;background:#fff;border-radius:18px;color:var(--muted)}
-    @media(max-width:1100px){.layout{grid-template-columns:1fr}.grid,.detail{max-height:none}.filters{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:620px){.app{padding:8px}.topbar{margin-left:-8px;margin-right:-8px}.head,.detailHead{flex-direction:column}.updated,.priceBox{text-align:left}.filters,.grid{grid-template-columns:1fr}.components,.metrics{grid-template-columns:repeat(2,1fr)}.detailSymbol{font-size:44px}}
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--navy);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      padding: 10px 12px 24px;
+    }
+
+    .topbar {
+      margin: -10px -12px 20px;
+      padding: 10px 12px 18px;
+      border-radius: 0 0 22px 22px;
+      background: #fff;
+    }
+
+    .head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0 15px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .subtitle,
+    .updated {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .updated {
+      text-align: right;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 9px;
+      overflow-x: auto;
+      padding-top: 10px;
+    }
+
+    .tab {
+      flex: 0 0 auto;
+      padding: 11px 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      border-color: var(--navy);
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1.5fr 0.8fr 0.8fr 0.7fr 0.8fr;
+      gap: 11px;
+      padding-top: 13px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 45px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      outline: none;
+      background: #fff;
+      color: #1e293b;
+    }
+
+    .notice {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border: 1px solid #b8dcff;
+      border-radius: 12px;
+      background: #f1f8ff;
+      color: #294b70;
+      line-height: 1.6;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(560px, 1.08fr) minmax(500px, 0.92fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(250px, 1fr));
+      gap: 16px;
+      max-height: calc(100vh - 265px);
+      overflow-y: auto;
+      padding: 1px 5px 8px 1px;
+    }
+
+    .card {
+      min-height: 266px;
+      padding: 16px 12px 14px;
+      border: 1px solid transparent;
+      border-radius: 20px;
+      background: #fff;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.1);
+    }
+
+    .card.active {
+      border-color: var(--navy);
+    }
+
+    .card-head,
+    .detail-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .symbol {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+
+    .company {
+      margin-top: 4px;
+      color: #5c7595;
+      font-size: 12px;
+    }
+
+    .pills {
+      display: grid;
+      gap: 7px;
+      justify-items: end;
+    }
+
+    .pill {
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .score-pill {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    .tplus-pill {
+      background: var(--sky-bg);
+      color: var(--sky);
+    }
+
+    .progress {
+      height: 7px;
+      margin: 17px 0;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #edf2f7;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      background: var(--navy);
+    }
+
+    .action {
+      margin-bottom: 7px;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .up { color: var(--green); }
+    .down { color: var(--red); }
+    .wait { color: var(--orange); }
+    .neutral { color: #38516e; }
+
+    .reason {
+      min-height: 38px;
+      color: #365170;
+      line-height: 1.45;
+    }
+
+    .metrics,
+    .components {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .metric,
+    .component {
+      padding: 10px 8px;
+      border-radius: 12px;
+      background: #f1f7fc;
+    }
+
+    .metric small,
+    .component small {
+      display: block;
+      margin-bottom: 4px;
+      color: #537298;
+      font-size: 10px;
+    }
+
+    .metric b,
+    .component b {
+      font-size: 14px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      padding: 5px 8px;
+      border: 1px solid #e0e8f1;
+      border-radius: 999px;
+      background: #f7fafc;
+      color: #38536f;
+      font-size: 10px;
+    }
+
+    .detail {
+      min-height: 600px;
+      max-height: calc(100vh - 265px);
+      overflow-y: auto;
+      padding: 25px;
+      border-radius: 20px;
+      background: #fff;
+    }
+
+    .empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 520px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .detail-symbol {
+      margin: 0;
+      font-size: 56px;
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .detail-company {
+      margin-top: 8px;
+      color: #527099;
+    }
+
+    .price-box {
+      min-width: 195px;
+      padding: 12px 15px;
+      border-radius: 14px;
+      background: #f1f7fc;
+      text-align: right;
+    }
+
+    .price-box small {
+      color: #527099;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .price {
+      margin-top: 4px;
+      font-size: 31px;
+      font-weight: 900;
+    }
+
+    .time {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .section {
+      padding: 21px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section:last-child {
+      border-bottom: 0;
+    }
+
+    .section h3 {
+      margin: 0 0 13px;
+      font-size: 18px;
+    }
+
+    .components {
+      grid-template-columns: repeat(3, 1fr);
+      margin: 0;
+    }
+
+    .component {
+      padding: 12px;
+    }
+
+    .component b {
+      font-size: 15px;
+    }
+
+    .summary {
+      margin-top: 12px;
+      padding: 13px;
+      border-radius: 12px;
+      background: #f2f8fd;
+      color: #304a68;
+      line-height: 1.6;
+    }
+
+    .criteria {
+      display: grid;
+      gap: 8px;
+    }
+
+    .criterion {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: #365170;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 19px;
+      line-height: 1.7;
+    }
+
+    .positive li { color: #176847; }
+    .risks li { color: #a34321; }
+
+    .no-result {
+      grid-column: 1 / -1;
+      padding: 35px;
+      border-radius: 18px;
+      background: #fff;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .grid,
+      .detail {
+        max-height: none;
+      }
+
+      .filters {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 620px) {
+      .app {
+        padding: 8px;
+      }
+
+      .topbar {
+        margin-right: -8px;
+        margin-left: -8px;
+      }
+
+      .head,
+      .detail-head {
+        flex-direction: column;
+      }
+
+      .updated,
+      .price-box {
+        text-align: left;
+      }
+
+      .filters,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics,
+      .components {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .detail-symbol {
+        font-size: 44px;
+      }
+    }
   </style>
 </head>
 
 <body>
-<div class="app">
-  <header class="topbar">
-    <div class="head">
-      <div>
-        <h1>VN Stock Radar</h1>
-        <div class="subtitle">Quét cơ hội T+, điểm mua tiềm năng, breakout, pullback, dòng tiền, MACD, RSI và VIC Leap</div>
+  <div class="app">
+    <header class="topbar">
+      <div class="head">
+        <div>
+          <h1>VN Stock Radar</h1>
+          <div class="subtitle">
+            Quét cơ hội T+, điểm mua tiềm năng, breakout, pullback, dòng tiền, MACD, RSI và VIC Leap
+          </div>
+        </div>
+
+        <div class="updated" id="updated">Đang tải dữ liệu...</div>
       </div>
-      <div class="updated" id="updated">Đang tải dữ liệu...</div>
-    </div>
 
-    <div class="tabs">
-      <button class="tab" data-tab="top">Top cơ hội</button>
-      <button class="tab active" data-tab="tplus">Lướt sóng T+</button>
-      <button class="tab" data-tab="early">T+ tiềm năng</button>
-      <button class="tab" data-tab="bluechip">Bluechip</button>
-      <button class="tab" data-tab="penny">Penny</button>
-      <button class="tab" data-tab="vic">Bước nhảy VIC</button>
-      <button class="tab" data-tab="breakout20">Breakout 20 phiên</button>
-      <button class="tab" data-tab="breakout60">Breakout 60 phiên</button>
-      <button class="tab" data-tab="breakout120">Breakout 120 phiên</button>
-      <button class="tab" data-tab="ma20">Pullback MA20</button>
-      <button class="tab" data-tab="ma50">Pullback MA50</button>
-      <button class="tab" data-tab="money">Dòng tiền mạnh</button>
-      <button class="tab" data-tab="macd">MACD đảo chiều</button>
-      <button class="tab" data-tab="rsi">RSI hồi phục</button>
-    </div>
+      <div class="tabs">
+        <button class="tab" data-tab="top">Top cơ hội</button>
+        <button class="tab active" data-tab="tplus">Lướt sóng T+</button>
+        <button class="tab" data-tab="early">T+ tiềm năng</button>
+        <button class="tab" data-tab="bluechip">Bluechip</button>
+        <button class="tab" data-tab="penny">Penny</button>
+        <button class="tab" data-tab="vic">Bước nhảy VIC</button>
+        <button class="tab" data-tab="breakout20">Breakout 20 phiên</button>
+        <button class="tab" data-tab="breakout60">Breakout 60 phiên</button>
+        <button class="tab" data-tab="breakout120">Breakout 120 phiên</button>
+        <button class="tab" data-tab="ma20">Pullback MA20</button>
+        <button class="tab" data-tab="ma50">Pullback MA50</button>
+        <button class="tab" data-tab="money">Dòng tiền mạnh</button>
+        <button class="tab" data-tab="macd">MACD đảo chiều</button>
+        <button class="tab" data-tab="rsi">RSI hồi phục</button>
+      </div>
 
-    <div class="filters">
-      <input id="search" placeholder="Tìm mã, tên công ty, ngành..." />
-      <select id="industry"><option value="">Tất cả ngành</option></select>
-      <select id="action">
-        <option value="">Tất cả hành động</option>
-        <option value="MUA">Mua từng phần</option>
-        <option value="CHỜ">Chờ điểm mua</option>
-        <option value="THEO DÕI">Theo dõi</option>
-        <option value="TRÁNH">Tránh mua đuổi</option>
-      </select>
-      <select id="minScore">
-        <option value="0">Điểm tối thiểu</option>
-        <option value="40">Từ 40 điểm</option>
-        <option value="50">Từ 50 điểm</option>
-        <option value="60">Từ 60 điểm</option>
-        <option value="70">Từ 70 điểm</option>
-      </select>
-      <select id="sort">
-        <option value="early">Ưu tiên điểm mua sớm</option>
-        <option value="score">Điểm cao nhất</option>
-        <option value="tplus">T+ cao nhất</option>
-        <option value="rsi">RSI thấp đến cao</option>
-        <option value="change20">Tăng 20 phiên thấp đến cao</option>
-      </select>
-    </div>
-  </header>
+      <div class="filters">
+        <input id="search" placeholder="Tìm mã, tên công ty, ngành..." />
 
-  <div id="notice" class="notice"></div>
+        <select id="industry">
+          <option value="">Tất cả ngành</option>
+        </select>
 
-  <main class="layout">
-    <section id="grid" class="grid"></section>
-    <aside id="detail" class="detail"></aside>
-  </main>
-</div>
+        <select id="action">
+          <option value="">Tất cả hành động</option>
+          <option value="MUA">Mua từng phần</option>
+          <option value="CHỜ">Chờ điểm mua</option>
+          <option value="THEO DÕI">Theo dõi</option>
+          <option value="TRÁNH">Tránh mua đuổi</option>
+        </select>
 
-<script>
-let root = {}, stocks = [], activeTab = "tplus", selected = null;
+        <select id="minScore">
+          <option value="0">Điểm tối thiểu</option>
+          <option value="40">Từ 40 điểm</option>
+          <option value="50">Từ 50 điểm</option>
+          <option value="60">Từ 60 điểm</option>
+          <option value="70">Từ 70 điểm</option>
+        </select>
 
-const pick=(o,ks,f=null)=>{for(const k of ks)if(o?.[k]!==undefined&&o?.[k]!==null)return o[k];return f};
-const n=(v,f=0)=>{const x=Number(String(v??"").replace(",","."));return Number.isFinite(x)?x:f};
-const s=(v,f="")=>v===undefined||v===null?f:String(v);
-const fmt=(v,d=0)=>Number.isFinite(n(v,NaN))?new Intl.NumberFormat("vi-VN",{minimumFractionDigits:d,maximumFractionDigits:d}).format(n(v)):"--";
-const esc=v=>s(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+        <select id="sort">
+          <option value="early">Ưu tiên điểm mua sớm</option>
+          <option value="score">Điểm cao nhất</option>
+          <option value="tplus">T+ cao nhất</option>
+          <option value="rsi">RSI thấp đến cao</option>
+          <option value="change20">Tăng 20 phiên thấp đến cao</option>
+        </select>
+      </div>
+    </header>
 
-const sym=x=>s(pick(x,["symbol","code","ticker"]),"--");
-const name=x=>s(pick(x,["name","companyName","company"]),"Chưa phân ngành");
-const industry=x=>s(pick(x,["industry","sector","group"]),"Chưa phân ngành");
-const price=x=>n(pick(x,["price","close","lastPrice","currentPrice"]));
-const pText=x=>price(x)?(price(x)<1000?fmt(price(x),2):fmt(price(x))):"--";
-const score=x=>n(pick(x,["score","totalScore"]));
-const tp=x=>n(pick(x,["tplusScore","tPlusScore","tplus"]));
-const rsi=x=>n(pick(x,["rsi","RSI"]));
-const ma20=x=>n(pick(x,["ma20","MA20"]));
-const ma50=x=>n(pick(x,["ma50","MA50"]));
-const ma100=x=>n(pick(x,["ma100","MA100"]));
-const ch5=x=>n(pick(x,["change5","change_5d","return5"]));
-const ch20=x=>n(pick(x,["change20","change_20d","return20"]));
-const vr=x=>n(pick(x,["volumeRatio20","volume_ratio20","volRatio"]));
-const hist=x=>n(pick(x,["macdHistogram","macd_histogram","hist"]));
-const act=x=>s(pick(x,["action","conclusion","recommendation"]),"THEO DÕI").toUpperCase();
-const cats=x=>{const a=pick(x,["categories","tags","signals"],[]);return Array.isArray(a)?a.map(String):s(a).split(/[,|]/).map(z=>z.trim()).filter(Boolean)};
-const part=(x,k)=>n(x.scoreParts?.[k]??x[k]);
-const trend=x=>part(x,"trend"), money=x=>part(x,"money"), setup=x=>part(x,"setup"), vic=x=>part(x,"vicLeap"), risk=x=>part(x,"risk");
+    <div class="notice" id="notice"></div>
 
-function time(v){if(!v)return"Chưa có thời gian";const d=new Date(v);return Number.isNaN(d)?s(v):d.toLocaleString("vi-VN")}
-function dist20(x){return price(x)&&ma20(x)?((price(x)-ma20(x))/ma20(x))*100:null}
-function avoid(x){const d=dist20(x);return act(x).includes("TRÁNH")||rsi(x)>=72||(d!==null&&d>10)||ch20(x)>25}
+    <main class="layout">
+      <section class="grid" id="grid"></section>
+      <aside class="detail" id="detail"></aside>
+    </main>
+  </div>
 
-function early(x){
-  const d=dist20(x), d50=ma50(x)?((price(x)-ma50(x))/ma50(x))*100:0;
-  return price(x)&&ma20(x)&&tp(x)>=9&&rsi(x)>=47&&rsi(x)<=64&&d>=-4&&d<=7&&
-    (!ma50(x)||d50>=-7)&&vr(x)>=1.1&&vr(x)<=3.5&&hist(x)>=0&&ch5(x)>=-4&&ch5(x)<=8&&
-    ch20(x)>=-10&&ch20(x)<=15&&!avoid(x);
-}
+  <script>
+    let rootData = {};
+    let stocks = [];
+    let activeTab = "tplus";
+    let selectedSymbol = null;
 
-function status(x){
-  if(early(x))return["T+ TIỀM NĂNG","up","Giá gần MA20, RSI chưa nóng, volume và MACD đang cải thiện. Theo dõi nến xác nhận hoặc pullback."];
-  if(avoid(x))return["TRÁNH MUA ĐUỔI","down","Giá đã nóng, RSI cao hoặc đã cách xa MA20. Ưu tiên chờ rung lắc/pullback."];
-  return["CHỜ XÁC NHẬN","wait","Chưa đủ điều kiện điểm mua T+ sớm; theo dõi thêm giá, thanh khoản và MACD."];
-}
+    const number = (value, fallback = 0) => {
+      const parsed = Number(String(value ?? "").replace(",", "."));
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
 
-function buyTarget(x){
-  if(!price(x)||!ma20(x))return{zone:"Chưa đủ dữ liệu",stop:"--",entry:"--",t1:"--",t2:"--",rr:"--",distance:"--"};
-  const low=ma20(x)*.99, high=ma20(x)*1.03;
-  const stopRaw=Math.min(ma20(x)*.965,ma50(x)&&Math.abs(ma50(x)-ma20(x))/ma20(x)<.1?ma50(x)*.975:Infinity);
-  let entry=price(x); if(entry<low)entry=low;if(entry>high)entry=high;
-  const R=entry-stopRaw;
-  const raw1=n(pick(x,["target1","target_1","resistance20","resistance_20"]),entry+R*1.5);
-  const raw2=n(pick(x,["target2","target_2","resistance60","resistance_60"]),entry+R*2.5);
-  const t1=Math.max(raw1,entry+R*1.2),t2=Math.max(raw2,entry+R*2);
-  return{
-    zone:`${fmt(low,2)} – ${fmt(high,2)}`,stop:fmt(stopRaw,2),entry:fmt(entry,2),
-    t1:fmt(t1,2),t2:fmt(t2,2),rr:`1 : ${fmt((t2-entry)/R,1)}`,
-    distance:`${dist20(x)>0?"+":""}${fmt(dist20(x),2)}% so với MA20`,
-    p1:`+${fmt((t1-entry)/entry*100,2)}%`,p2:`+${fmt((t2-entry)/entry*100,2)}%`
-  };
-}
+    const text = (value, fallback = "") =>
+      value === undefined || value === null ? fallback : String(value);
 
-function level(x){
-  if(score(x)>=65&&tp(x)>=11&&trend(x)>=10&&money(x)>=10&&setup(x)>=6&&vic(x)>=7&&risk(x)>=6&&rsi(x)>=47&&rsi(x)<=68&&!avoid(x))return"TOP CƠ HỘI";
-  if(early(x)||(score(x)>=45&&tp(x)>=9&&rsi(x)>=45&&rsi(x)<=68&&!avoid(x)))return"TIỀM NĂNG – CHỜ ĐIỂM MUA";
-  return"";
-}
-const cat=(x,k)=>cats(x).join(" ").toLowerCase().includes(k.toLowerCase());
+    const format = (value, decimals = 0) => {
+      const parsed = number(value, NaN);
 
-function match(x){
-  if(activeTab==="top")return!!level(x);
-  if(activeTab==="tplus")return(tp(x)>=9||cat(x,"lướt sóng t+"))&&!avoid(x);
-  if(activeTab==="early")return early(x);
-  if(activeTab==="bluechip")return cat(x,"bluechip");
-  if(activeTab==="penny")return cat(x,"penny");
-  if(activeTab==="vic")return vic(x)>=7||cat(x,"bước nhảy vic");
-  if(activeTab==="breakout20")return cat(x,"breakout 20");
-  if(activeTab==="breakout60")return cat(x,"breakout 60");
-  if(activeTab==="breakout120")return cat(x,"breakout 120");
-  if(activeTab==="ma20")return cat(x,"pullback ma20");
-  if(activeTab==="ma50")return cat(x,"pullback ma50");
-  if(activeTab==="money")return money(x)>=10||cat(x,"dòng tiền");
-  if(activeTab==="macd")return cat(x,"macd");
-  if(activeTab==="rsi")return cat(x,"rsi");
-  return true;
-}
+      if (!Number.isFinite(parsed)) return "--";
 
-function list(){
-  const q=document.querySelector("#search").value.toLowerCase().trim(), ind=document.querySelector("#industry").value,
-    af=document.querySelector("#action").value,min=n(document.querySelector("#minScore").value),sort=document.querySelector("#sort").value;
-  return stocks.filter(x=>match(x)&&(!q||`${sym(x)} ${name(x)} ${industry(x)} ${cats(x).join(" ")}`.toLowerCase().includes(q))&&(!ind||industry(x)===ind)&&(!af||act(x).includes(af))&&score(x)>=min)
-  .sort((a,b)=>sort==="score"?score(b)-score(a):sort==="tplus"?tp(b)-tp(a):sort==="rsi"?rsi(a)-rsi(b):sort==="change20"?ch20(a)-ch20(b):(early(b)?1:0)-(early(a)?1:0)||tp(b)-tp(a)||score(b)-score(a));
-}
+      return new Intl.NumberFormat("vi-VN", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      }).format(parsed);
+    };
 
-function cls(v){return v.includes("TRÁNH")?"down":v.includes("MUA")||v.includes("TOP")||v.includes("TIỀM")?"up":v.includes("CHỜ")?"wait":"neutral"}
+    const escapeHtml = (value) =>
+      text(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 
-function render(){
-  const a=list(), note=document.querySelector("#notice");
-  if(activeTab==="early"){note.className="notice show";note.innerHTML="<b>T+ tiềm năng:</b> T+ ≥ 9, RSI 47–64, giá quanh MA20, volume 1.1–3.5x, MACD Histogram dương và chưa tăng xa. Đây là watchlist chờ điểm vào, không phải khuyến nghị mua ngay."}
-  else if(activeTab==="top"){note.className="notice show";note.innerHTML="<b>Top cơ hội:</b> lọc điểm số, T+, trend, dòng tiền, setup và rủi ro; đồng thời loại các mã RSI nóng hoặc mua đuổi. Nếu chưa có mã đạt chuẩn, hiển thị nhóm tiềm năng để theo dõi sớm."}
-  else {note.className="notice";note.innerHTML=""}
+    const symbol = (stock) => text(stock.symbol, "--");
+    const company = (stock) => text(stock.name, "Chưa phân ngành");
+    const industry = (stock) => text(stock.industry, "Chưa phân ngành");
 
-  if(!selected||!a.some(x=>sym(x)===selected))selected=a[0]?sym(a[0]):null;
-  const grid=document.querySelector("#grid");
-  if(!a.length){grid.innerHTML='<div class="noResult">Không có mã phù hợp với bộ lọc hiện tại.</div>';detail(null);return}
+    const price = (stock) => number(stock.price);
+    const priceText = (stock) => price(stock) ? format(price(stock), 2) : "--";
 
-  grid.innerHTML=a.map(x=>{
-    const label=activeTab==="early"?status(x)[0]:activeTab==="top"?(level(x)||act(x)):act(x);
-    return `<article class="card ${sym(x)===selected?"active":""}" data-s="${esc(sym(x))}">
-      <div class="cardHead"><div><h2 class="symbol">${esc(sym(x))}</h2><div class="company">${esc(name(x))} · ${esc(industry(x))}</div></div>
-      <div class="pills"><span class="pill score">${fmt(score(x))}/100</span><span class="pill tplus">T+ ${fmt(tp(x))}/15</span></div></div>
-      <div class="progress"><i style="width:${Math.min(100,score(x))}%"></i></div>
-      <div class="action ${cls(label)}">${esc(label)}</div>
-      <div class="reason">Giá ${pText(x)} · RSI ${fmt(rsi(x),2)} · 20 phiên ${fmt(ch20(x),2)}% · Vol ${fmt(vr(x),2)}x</div>
-      <div class="metrics"><div class="metric"><small>Giá</small><b>${pText(x)}</b></div><div class="metric"><small>RSI</small><b>${fmt(rsi(x),2)}</b></div><div class="metric"><small>T+</small><b>${fmt(tp(x))}/15</b></div><div class="metric"><small>VIC</small><b>${fmt(vic(x))}/15</b></div></div>
-      <div class="tags">${cats(x).slice(0,4).map(z=>`<span class="tag">${esc(z)}</span>`).join("")}</div></article>`
-  }).join("");
-  document.querySelectorAll(".card").forEach(e=>e.onclick=()=>{selected=e.dataset.s;render()});
-  detail(stocks.find(x=>sym(x)===selected));
-}
+    const score = (stock) => number(stock.score);
+    const tplus = (stock) => number(stock.tplusScore);
+    const rsi = (stock) => number(stock.rsi);
+    const ma20 = (stock) => number(stock.ma20);
+    const ma50 = (stock) => number(stock.ma50);
+    const ma100 = (stock) => number(stock.ma100);
+    const change5 = (stock) => number(stock.change5);
+    const change20 = (stock) => number(stock.change20);
+    const volumeRatio = (stock) => number(stock.volumeRatio20);
+    const histogram = (stock) => number(stock.macdHistogram);
 
-function row(label,ok){return`<div class="criterion"><span>${label}</span><b class="${ok?"up":"down"}">${ok?"Đạt":"Chưa đạt"}</b></div>`}
+    const scorePart = (stock, name) => number(stock.scoreParts?.[name]);
 
-function detail(x){
-  const el=document.querySelector("#detail");if(!x){el.innerHTML='<div class="empty">Chọn một mã để xem giá, vùng mua, target, chỉ báo và rủi ro.</div>';return}
-  const st=status(x), bt=buyTarget(x), positives=pick(x,["positives"],[]), risks=pick(x,["risks"],[]), change=n(pick(x,["changePercent","pctChange","percentChange"]));
-  el.innerHTML=`<div class="detailHead"><div><h2 class="detailSymbol">${esc(sym(x))}</h2><div class="detailCompany">${esc(name(x))} · ${esc(industry(x))}</div></div>
-  <div class="priceBox"><small>GIÁ HIỆN TẠI</small><div class="price">${pText(x)}</div><b class="${change>0?"up":change<0?"down":"neutral"}">${change>0?"+":""}${fmt(change,2)}%</b><div class="time">Cập nhật: ${esc(time(pick(x,["priceTime","updatedAt","time"],root.updatedAt||root.time)))}</div></div></div>
+    const categories = (stock) =>
+      Array.isArray(stock.categories) ? stock.categories : [];
 
-  <section class="section"><h3>Điểm mua & Target T+ tiềm năng</h3><div class="components">
-  <div class="component"><small>Trạng thái T+</small><b class="${st[1]}">${st[0]}</b></div>
-  <div class="component"><small>Vùng theo dõi / mua</small><b>${bt.zone}</b></div>
-  <div class="component"><small>Giá mua tham chiếu</small><b>${bt.entry}</b></div>
-  <div class="component"><small>Cắt lỗ tham khảo</small><b class="down">${bt.stop}</b></div>
-  <div class="component"><small>Target 1 · chốt một phần</small><b class="up">${bt.t1}</b><small class="up">${bt.p1}</small></div>
-  <div class="component"><small>Target 2 · giữ phần còn lại</small><b class="up">${bt.t2}</b><small class="up">${bt.p2}</small></div>
-  <div class="component"><small>Risk / Reward đến T2</small><b>${bt.rr}</b></div>
-  <div class="component"><small>Vị trí so với MA20</small><b>${bt.distance}</b></div>
-  <div class="component"><small>Khối lượng / TB20</small><b>${fmt(vr(x),2)}x</b></div></div>
-  <div class="summary"><b>${st[0]}:</b> ${st[2]}<br><br><b>Cách xử lý target:</b> Khi đạt Target 1, cân nhắc chốt một phần và dời stop-loss về giá vốn. Target chỉ là vùng kỹ thuật tham khảo, không phải mức giá chắc chắn đạt.</div></section>
+    const positives = (stock) =>
+      Array.isArray(stock.positives) ? stock.positives : [];
 
-  <section class="section"><h3>Kết luận</h3><div class="summary"><b class="${cls(level(x)||act(x))}">${level(x)||act(x)}</b><br><br>
-  Setup: <b>${esc(s(pick(x,["setup","setupName"]),"Theo dõi"))}</b> · Market state: <b>${esc(s(pick(x,["marketState","market_state"]),"Chưa xác nhận"))}</b> · Tổng điểm: <b>${fmt(score(x))}/100</b> · T+: <b>${fmt(tp(x))}/15</b></div></section>
+    const risks = (stock) =>
+      Array.isArray(stock.risks) ? stock.risks : [];
 
-  <section class="section"><h3>Điểm thành phần</h3><div class="components">
-  <div class="component"><small>Trend</small><b>${fmt(trend(x))}</b></div><div class="component"><small>Momentum</small><b>${fmt(part(x,"momentum"))}</b></div><div class="component"><small>Money</small><b>${fmt(money(x))}</b></div>
-  <div class="component"><small>Setup</small><b>${fmt(setup(x))}</b></div><div class="component"><small>VIC Leap</small><b>${fmt(vic(x))}</b></div><div class="component"><small>T+</small><b>${fmt(tp(x))}</b></div><div class="component"><small>Risk</small><b>${fmt(risk(x))}</b></div></div></section>
+    function dateText(value) {
+      if (!value) return "Chưa có thời gian";
 
-  <section class="section"><h3>Chỉ báo kỹ thuật</h3><div class="components">
-  <div class="component"><small>MA20</small><b>${fmt(ma20(x),2)}</b></div><div class="component"><small>MA50</small><b>${fmt(ma50(x),2)}</b></div><div class="component"><small>MA100</small><b>${fmt(ma100(x),2)}</b></div>
-  <div class="component"><small>RSI</small><b>${fmt(rsi(x),2)}</b></div><div class="component"><small>MACD Histogram</small><b>${fmt(hist(x),3)}</b></div><div class="component"><small>Tăng 20 phiên</small><b>${ch20(x)>0?"+":""}${fmt(ch20(x),2)}%</b></div></div></section>
+      const date = new Date(value);
 
-  <section class="section"><h3>Kiểm tra T+ tiềm năng</h3><div class="criteria">
-  ${row("Điểm T+ từ 9/15",tp(x)>=9)}${row("RSI trong vùng 47–64",rsi(x)>=47&&rsi(x)<=64)}${row("Giá quanh MA20 (-4% đến +7%)",dist20(x)!==null&&dist20(x)>=-4&&dist20(x)<=7)}
-  ${row("Volume ratio 1.1x–3.5x",vr(x)>=1.1&&vr(x)<=3.5)}${row("MACD Histogram từ 0 trở lên",hist(x)>=0)}${row("Không thuộc vùng mua đuổi",!avoid(x))}</div></section>
+      return Number.isNaN(date.getTime())
+        ? text(value)
+        : date.toLocaleString("vi-VN");
+    }
 
-  <section class="section"><h3>Tín hiệu tích cực</h3>${positives.length?`<ul class="positive">${positives.map(z=>`<li>${esc(z)}</li>`).join("")}</ul>`:'<div class="summary">Chưa có ghi chú riêng.</div>'}</section>
-  <section class="section"><h3>Rủi ro cần lưu ý</h3>${risks.length?`<ul class="risks">${risks.map(z=>`<li>${esc(z)}</li>`).join("")}</ul>`:'<div class="summary">Luôn quản trị tỷ trọng và cắt lỗ.</div>'}</section>`;
-}
+    function distanceMA20(stock) {
+      if (!price(stock) || !ma20(stock)) return null;
 
-function industries(){
-  const el=document.querySelector("#industry"),old=el.value,a=[...new Set(stocks.map(industry))].sort((a,b)=>a.localeCompare(b,"vi"));
-  el.innerHTML='<option value="">Tất cả ngành</option>'+a.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");el.value=old;
-}
+      return ((price(stock) - ma20(stock)) / ma20(stock)) * 100;
+    }
 
-async function load(){
-  try{
-    const res=await fetch(`data.json?t=${Date.now()}`);if(!res.ok)throw Error("data.json");
-    root=await res.json();stocks=(Array.isArray(root)?root:root.stocks||root.data||root.items||root.results||[]).filter(x=>sym(x)!=="--");
-    document.querySelector("#updated").innerHTML=`Cập nhật: ${time(root.updatedAt||root.lastUpdated||root.time)}<br>${stocks.length} mã`;
-    industries();render();
-  }catch(e){document.querySelector("#grid").innerHTML='<div class="noResult">Không đọc được file data.json.</div>';detail(null)}
-}
+    function isAvoidChasing(stock) {
+      const distance = distanceMA20(stock);
 
-document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;selected=null;document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");render()});
-document.querySelector("#search").oninput=()=>{selected=null;render()};
-["industry","action","minScore","sort"].forEach(id=>document.querySelector("#"+id).onchange=()=>{selected=null;render()});
-load();setInterval(load,60000);
-</script>
+      return (
+        text(stock.action).toUpperCase().includes("TRÁNH") ||
+        rsi(stock) >= 72 ||
+        (distance !== null && distance > 10) ||
+        change20(stock) > 25
+      );
+    }
+
+    function isEarlyTPlus(stock) {
+      const distance = distanceMA20(stock);
+      const distanceMA50 = ma50(stock)
+        ? ((price(stock) - ma50(stock)) / ma50(stock)) * 100
+        : 0;
+
+      return (
+        price(stock) &&
+        ma20(stock) &&
+        tplus(stock) >= 9 &&
+        rsi(stock) >= 47 &&
+        rsi(stock) <= 64 &&
+        distance >= -4 &&
+        distance <= 7 &&
+        (!ma50(stock) || distanceMA50 >= -7) &&
+        volumeRatio(stock) >= 1.1 &&
+        volumeRatio(stock) <= 3.5 &&
+        histogram(stock) >= 0 &&
+        change5(stock) >= -4 &&
+        change5(stock) <= 8 &&
+        change20(stock) >= -10 &&
+        change20(stock) <= 15 &&
+        !isAvoidChasing(stock)
+      );
+    }
+
+    function tplusStatus(stock) {
+      if (isEarlyTPlus(stock)) {
+        return {
+          label: "T+ TIỀM NĂNG",
+          className: "up",
+          description:
+            "Giá gần MA20, RSI chưa nóng, dòng tiền/MACD đang cải thiện. Đưa vào watchlist để chờ nến xác nhận hoặc pullback."
+        };
+      }
+
+      if (isAvoidChasing(stock)) {
+        return {
+          label: "TRÁNH MUA ĐUỔI",
+          className: "down",
+          description:
+            "Giá đã nóng, RSI cao hoặc đã cách xa MA20. Nếu chưa có hàng, ưu tiên chờ rung lắc hoặc pullback."
+        };
+      }
+
+      return {
+        label: "CHỜ XÁC NHẬN",
+        className: "wait",
+        description:
+          "Chưa đủ điều kiện điểm mua T+ sớm. Theo dõi thêm cấu trúc giá, thanh khoản và MACD."
+      };
+    }
+
+    function buyTargets(stock) {
+      if (!price(stock) || !ma20(stock)) {
+        return {
+          zone: "--",
+          entry: "--",
+          stop: "--",
+          target1: "--",
+          target2: "--",
+          target1Percent: "--",
+          target2Percent: "--",
+          riskReward: "--",
+          distance: "--"
+        };
+      }
+
+      const buyLow = ma20(stock) * 0.99;
+      const buyHigh = ma20(stock) * 1.03;
+
+      let entry = price(stock);
+
+      if (entry < buyLow) entry = buyLow;
+      if (entry > buyHigh) entry = buyHigh;
+
+      const stopByMA20 = ma20(stock) * 0.965;
+      const stopByMA50 = ma50(stock) ? ma50(stock) * 0.975 : Infinity;
+
+      const stop = Math.min(stopByMA20, stopByMA50);
+      const risk = entry - stop;
+
+      const target1 = risk > 0 ? entry + risk * 1.5 : 0;
+      const target2 = risk > 0 ? entry + risk * 2.5 : 0;
+
+      return {
+        zone: `${format(buyLow, 2)} – ${format(buyHigh, 2)}`,
+        entry: format(entry, 2),
+        stop: format(stop, 2),
+        target1: format(target1, 2),
+        target2: format(target2, 2),
+        target1Percent: `+${format(((target1 - entry) / entry) * 100, 2)}%`,
+        target2Percent: `+${format(((target2 - entry) / entry) * 100, 2)}%`,
+        riskReward: risk > 0 ? `1 : ${format((target2 - entry) / risk, 1)}` : "--",
+        distance: `${distanceMA20(stock) > 0 ? "+" : ""}${format(distanceMA20(stock), 2)}% so với MA20`
+      };
+    }
+
+    function opportunityLevel(stock) {
+      const strict =
+        score(stock) >= 65 &&
+        tplus(stock) >= 11 &&
+        scorePart(stock, "trend") >= 10 &&
+        scorePart(stock, "money") >= 10 &&
+        scorePart(stock, "setup") >= 6 &&
+        scorePart(stock, "vicLeap") >= 7 &&
+        scorePart(stock, "risk") >= 6 &&
+        rsi(stock) >= 47 &&
+        rsi(stock) <= 68 &&
+        !isAvoidChasing(stock);
+
+      if (strict) return "TOP CƠ HỘI";
+
+      if (
+        isEarlyTPlus(stock) ||
+        (
+          score(stock) >= 45 &&
+          tplus(stock) >= 9 &&
+          rsi(stock) >= 45 &&
+          rsi(stock) <= 68 &&
+          !isAvoidChasing(stock)
+        )
+      ) {
+        return "TIỀM NĂNG – CHỜ ĐIỂM MUA";
+      }
+
+      return "";
+    }
+
+    function hasCategory(stock, keyword) {
+      return categories(stock)
+        .join(" ")
+        .toLowerCase()
+        .includes(keyword.toLowerCase());
+    }
+
+    function matchesTab(stock) {
+      if (activeTab === "top") return Boolean(opportunityLevel(stock));
+
+      if (activeTab === "tplus") {
+        return (
+          (tplus(stock) >= 9 || hasCategory(stock, "lướt sóng t+")) &&
+          !isAvoidChasing(stock)
+        );
+      }
+
+      if (activeTab === "early") return isEarlyTPlus(stock);
+      if (activeTab === "bluechip") return hasCategory(stock, "bluechip");
+      if (activeTab === "penny") return hasCategory(stock, "penny");
+      if (activeTab === "vic") return hasCategory(stock, "bước nhảy vic");
+      if (activeTab === "breakout20") return hasCategory(stock, "breakout 20");
+      if (activeTab === "breakout60") return hasCategory(stock, "breakout 60");
+      if (activeTab === "breakout120") return hasCategory(stock, "breakout 120");
+      if (activeTab === "ma20") return hasCategory(stock, "pullback ma20");
+      if (activeTab === "ma50") return hasCategory(stock, "pullback ma50");
+      if (activeTab === "money") return hasCategory(stock, "dòng tiền");
+      if (activeTab === "macd") return hasCategory(stock, "macd");
+      if (activeTab === "rsi") return hasCategory(stock, "rsi");
+
+      return true;
+    }
+
+    function filteredStocks() {
+      const keyword = document.querySelector("#search").value.trim().toLowerCase();
+      const selectedIndustry = document.querySelector("#industry").value;
+      const actionFilter = document.querySelector("#action").value;
+      const minimumScore = number(document.querySelector("#minScore").value);
+      const sort = document.querySelector("#sort").value;
+
+      const result = stocks.filter((stock) => {
+        const searchText = [
+          symbol(stock),
+          company(stock),
+          industry(stock),
+          ...categories(stock)
+        ].join(" ").toLowerCase();
+
+        return (
+          matchesTab(stock) &&
+          (!keyword || searchText.includes(keyword)) &&
+          (!selectedIndustry || industry(stock) === selectedIndustry) &&
+          (!actionFilter || text(stock.action).toUpperCase().includes(actionFilter)) &&
+          score(stock) >= minimumScore
+        );
+      });
+
+      return result.sort((a, b) => {
+        if (sort === "score") return score(b) - score(a);
+        if (sort === "tplus") return tplus(b) - tplus(a);
+        if (sort === "rsi") return rsi(a) - rsi(b);
+        if (sort === "change20") return change20(a) - change20(b);
+
+        const earlyA = isEarlyTPlus(a) ? 1 : 0;
+        const earlyB = isEarlyTPlus(b) ? 1 : 0;
+
+        if (earlyA !== earlyB) return earlyB - earlyA;
+        if (tplus(a) !== tplus(b)) return tplus(b) - tplus(a);
+
+        return score(b) - score(a);
+      });
+    }
+
+    function colorClass(label) {
+      if (label.includes("TRÁNH")) return "down";
+      if (label.includes("TOP") || label.includes("TIỀM NĂNG") || label.includes("MUA")) return "up";
+      if (label.includes("CHỜ")) return "wait";
+      return "neutral";
+    }
+
+    function renderNotice(list) {
+      const notice = document.querySelector("#notice");
+
+      if (activeTab === "early") {
+        notice.className = "notice show";
+        notice.innerHTML = `
+          <strong>T+ tiềm năng:</strong> ưu tiên T+ từ 9/15, RSI 47–64, giá quanh MA20,
+          volume 1.1–3.5x, MACD Histogram dương và chưa tăng xa.
+          Đây là watchlist chờ điểm vào, không phải khuyến nghị mua ngay.
+          Hiện có <strong>${list.length} mã</strong>.
+        `;
+        return;
+      }
+
+      if (activeTab === "top") {
+        notice.className = "notice show";
+        notice.innerHTML = `
+          <strong>Top cơ hội:</strong> ưu tiên điểm tổng, T+, xu hướng, dòng tiền,
+          setup và mức rủi ro tốt; đồng thời loại mã RSI nóng hoặc giá đã chạy xa MA20.
+          Nếu chưa có mã đạt chuẩn, hệ thống hiển thị nhóm “Tiềm năng – chờ điểm mua”.
+        `;
+        return;
+      }
+
+      if (activeTab === "tplus") {
+        notice.className = "notice show";
+        notice.innerHTML = `
+          <strong>Lướt sóng T+:</strong> đã loại tương đối các mã có cảnh báo mua đuổi.
+          Muốn tìm mã chưa chạy mạnh, chọn tab <strong>T+ tiềm năng</strong>.
+        `;
+        return;
+      }
+
+      notice.className = "notice";
+      notice.innerHTML = "";
+    }
+
+    function renderCards() {
+      const list = filteredStocks();
+
+      renderNotice(list);
+
+      if (!selectedSymbol || !list.some((stock) => symbol(stock) === selectedSymbol)) {
+        selectedSymbol = list[0] ? symbol(list[0]) : null;
+      }
+
+      const grid = document.querySelector("#grid");
+
+      if (!list.length) {
+        grid.innerHTML = `
+          <div class="no-result">
+            Không có mã phù hợp với bộ lọc hiện tại.<br><br>
+            Thử giảm điểm tối thiểu hoặc chọn tab khác.
+          </div>
+        `;
+
+        renderDetail(null);
+        return;
+      }
+
+      grid.innerHTML = list.map((stock) => {
+        const label =
+          activeTab === "early"
+            ? tplusStatus(stock).label
+            : activeTab === "top"
+              ? opportunityLevel(stock) || text(stock.action)
+              : text(stock.action);
+
+        return `
+          <article class="card ${symbol(stock) === selectedSymbol ? "active" : ""}" data-symbol="${escapeHtml(symbol(stock))}">
+            <div class="card-head">
+              <div>
+                <h2 class="symbol">${escapeHtml(symbol(stock))}</h2>
+                <div class="company">${escapeHtml(company(stock))} · ${escapeHtml(industry(stock))}</div>
+              </div>
+
+              <div class="pills">
+                <span class="pill score-pill">${format(score(stock))}/100</span>
+                <span class="pill tplus-pill">T+ ${format(tplus(stock))}/15</span>
+              </div>
+            </div>
+
+            <div class="progress">
+              <span style="width:${Math.min(100, Math.max(0, score(stock)))}%"></span>
+            </div>
+
+            <div class="action ${colorClass(label)}">${escapeHtml(label)}</div>
+
+            <div class="reason">
+              Giá ${priceText(stock)} · RSI ${format(rsi(stock), 2)} ·
+              20 phiên ${format(change20(stock), 2)}% ·
+              Vol ${format(volumeRatio(stock), 2)}x
+            </div>
+
+            <div class="metrics">
+              <div class="metric"><small>Giá</small><b>${priceText(stock)}</b></div>
+              <div class="metric"><small>RSI</small><b>${format(rsi(stock), 2)}</b></div>
+              <div class="metric"><small>T+</small><b>${format(tplus(stock))}/15</b></div>
+              <div class="metric"><small>VIC</small><b>${format(scorePart(stock, "vicLeap"))}/15</b></div>
+            </div>
+
+            <div class="tags">
+              ${categories(stock).slice(0, 4).map((tag) => `
+                <span class="tag">${escapeHtml(tag)}</span>
+              `).join("")}
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".card").forEach((card) => {
+        card.addEventListener("click", () => {
+          selectedSymbol = card.dataset.symbol;
+          renderCards();
+        });
+      });
+
+      renderDetail(stocks.find((stock) => symbol(stock) === selectedSymbol));
+    }
+
+    function criterion(label, passed) {
+      return `
+        <div class="criterion">
+          <span>${escapeHtml(label)}</span>
+          <b class="${passed ? "up" : "down"}">${passed ? "Đạt" : "Chưa đạt"}</b>
+        </div>
+      `;
+    }
+
+    function renderDetail(stock) {
+      const detail = document.querySelector("#detail");
+
+      if (!stock) {
+        detail.innerHTML = `
+          <div class="empty">
+            Chọn một mã để xem giá, vùng mua,<br>
+            Target T+, chỉ báo và rủi ro.
+          </div>
+        `;
+        return;
+      }
+
+      const status = tplusStatus(stock);
+      const targets = buyTargets(stock);
+      const opportunity = opportunityLevel(stock);
+
+      detail.innerHTML = `
+        <div class="detail-head">
+          <div>
+            <h2 class="detail-symbol">${escapeHtml(symbol(stock))}</h2>
+            <div class="detail-company">${escapeHtml(company(stock))} · ${escapeHtml(industry(stock))}</div>
+          </div>
+
+          <div class="price-box">
+            <small>GIÁ HIỆN TẠI</small>
+            <div class="price">${priceText(stock)}</div>
+            <div class="time">Cập nhật: ${escapeHtml(dateText(stock.priceTime || rootData.updatedAt))}</div>
+          </div>
+        </div>
+
+        <section class="section">
+          <h3>Điểm mua & Target T+ tiềm năng</h3>
+
+          <div class="components">
+            <div class="component">
+              <small>Trạng thái T+</small>
+              <b class="${status.className}">${escapeHtml(status.label)}</b>
+            </div>
+
+            <div class="component">
+              <small>Vùng theo dõi / mua</small>
+              <b>${targets.zone}</b>
+            </div>
+
+            <div class="component">
+              <small>Giá mua tham chiếu</small>
+              <b>${targets.entry}</b>
+            </div>
+
+            <div class="component">
+              <small>Cắt lỗ tham khảo</small>
+              <b class="down">${targets.stop}</b>
+            </div>
+
+            <div class="component">
+              <small>Target 1 · chốt một phần</small>
+              <b class="up">${targets.target1}</b>
+              <small class="up">${targets.target1Percent}</small>
+            </div>
+
+            <div class="component">
+              <small>Target 2 · giữ phần còn lại</small>
+              <b class="up">${targets.target2}</b>
+              <small class="up">${targets.target2Percent}</small>
+            </div>
+
+            <div class="component">
+              <small>Risk / Reward đến T2</small>
+              <b>${targets.riskReward}</b>
+            </div>
+
+            <div class="component">
+              <small>Vị trí so với MA20</small>
+              <b>${targets.distance}</b>
+            </div>
+
+            <div class="component">
+              <small>Khối lượng / TB20</small>
+              <b>${format(volumeRatio(stock), 2)}x</b>
+            </div>
+          </div>
+
+          <div class="summary">
+            <strong>${escapeHtml(status.label)}:</strong> ${escapeHtml(status.description)}
+            <br><br>
+            <strong>Quản trị target:</strong> khi giá đến Target 1, có thể chốt một phần
+            và dời stop-loss lên giá vốn. Target là vùng kỹ thuật tham khảo, không phải cam kết lợi nhuận.
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Kết luận</h3>
+
+          <div class="summary">
+            <strong class="${colorClass(opportunity || text(stock.action))}">
+              ${escapeHtml(opportunity || text(stock.action))}
+            </strong>
+            <br><br>
+            Setup: <strong>${escapeHtml(text(stock.setup, "Theo dõi"))}</strong> ·
+            Market state: <strong>${escapeHtml(text(stock.marketState, "Chưa xác nhận"))}</strong> ·
+            Tổng điểm: <strong>${format(score(stock))}/100</strong> ·
+            T+: <strong>${format(tplus(stock))}/15</strong>
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Điểm thành phần</h3>
+
+          <div class="components">
+            <div class="component"><small>Trend</small><b>${format(scorePart(stock, "trend"))}</b></div>
+            <div class="component"><small>Momentum</small><b>${format(scorePart(stock, "momentum"))}</b></div>
+            <div class="component"><small>Money</small><b>${format(scorePart(stock, "money"))}</b></div>
+            <div class="component"><small>Setup</small><b>${format(scorePart(stock, "setup"))}</b></div>
+            <div class="component"><small>VIC Leap</small><b>${format(scorePart(stock, "vicLeap"))}</b></div>
+            <div class="component"><small>T+</small><b>${format(tplus(stock))}</b></div>
+            <div class="component"><small>Risk</small><b>${format(scorePart(stock, "risk"))}</b></div>
+            <div class="component"><small>Tổng điểm</small><b>${format(score(stock))}/100</b></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Chỉ báo kỹ thuật</h3>
+
+          <div class="components">
+            <div class="component"><small>MA20</small><b>${format(ma20(stock), 2)}</b></div>
+            <div class="component"><small>MA50</small><b>${format(ma50(stock), 2)}</b></div>
+            <div class="component"><small>MA100</small><b>${format(ma100(stock), 2)}</b></div>
+            <div class="component"><small>RSI</small><b>${format(rsi(stock), 2)}</b></div>
+            <div class="component"><small>MACD</small><b>${format(stock.macd, 3)}</b></div>
+            <div class="component"><small>MACD Histogram</small><b>${format(histogram(stock), 3)}</b></div>
+            <div class="component"><small>Tăng 5 phiên</small><b>${format(change5(stock), 2)}%</b></div>
+            <div class="component"><small>Tăng 20 phiên</small><b>${format(change20(stock), 2)}%</b></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Kiểm tra T+ tiềm năng</h3>
+
+          <div class="criteria">
+            ${criterion("Điểm T+ từ 9/15", tplus(stock) >= 9)}
+            ${criterion("RSI trong vùng 47–64", rsi(stock) >= 47 && rsi(stock) <= 64)}
+            ${criterion("Giá quanh MA20 (-4% đến +7%)", (() => {
+              const distance = distanceMA20(stock);
+              return distance !== null && distance >= -4 && distance <= 7;
+            })())}
+            ${criterion("Volume ratio 1.1x–3.5x", volumeRatio(stock) >= 1.1 && volumeRatio(stock) <= 3.5)}
+            ${criterion("MACD Histogram từ 0 trở lên", histogram(stock) >= 0)}
+            ${criterion("Tăng 20 phiên không quá 15%", change20(stock) <= 15)}
+            ${criterion("Không thuộc vùng mua đuổi", !isAvoidChasing(stock))}
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Tín hiệu tích cực</h3>
+
+          ${
+            positives(stock).length
+              ? `<ul class="positive">${positives(stock).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+              : `<div class="summary">Chưa có ghi chú tích cực riêng cho mã này.</div>`
+          }
+        </section>
+
+        <section class="section">
+          <h3>Rủi ro cần lưu ý</h3>
+
+          ${
+            risks(stock).length
+              ? `<ul class="risks">${risks(stock).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+              : `<div class="summary">Luôn quản trị tỷ trọng vốn và tuân thủ cắt lỗ.</div>`
+          }
+        </section>
+      `;
+    }
+
+    function populateIndustries() {
+      const select = document.querySelector("#industry");
+      const current = select.value;
+
+      const list = [...new Set(stocks.map(industry))]
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b, "vi"));
+
+      select.innerHTML =
+        `<option value="">Tất cả ngành</option>` +
+        list.map((item) => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join("");
+
+      select.value = current;
+    }
+
+    async function loadData() {
+      try {
+        const response = await fetch(`data.json?t=${Date.now()}`);
+
+        if (!response.ok) {
+          throw new Error(`Không tải được data.json: HTTP ${response.status}`);
+        }
+
+        rootData = await response.json();
+
+        stocks = Array.isArray(rootData)
+          ? rootData
+          : (rootData.data || rootData.stocks || rootData.items || []);
+
+        if (!Array.isArray(stocks) || !stocks.length) {
+          throw new Error("data.json không có dữ liệu cổ phiếu.");
+        }
+
+        document.querySelector("#updated").innerHTML = `
+          Cập nhật: ${escapeHtml(dateText(rootData.updatedAt))}<br>
+          ${stocks.length} mã
+        `;
+
+        populateIndustries();
+        renderCards();
+
+      } catch (error) {
+        console.error(error);
+
+        document.querySelector("#updated").textContent = "Không thể tải dữ liệu";
+
+        document.querySelector("#grid").innerHTML = `
+          <div class="no-result">
+            Không đọc được <strong>data.json</strong>.<br><br>
+            ${escapeHtml(error.message)}
+          </div>
+        `;
+
+        renderDetail(null);
+      }
+    }
+
+    document.querySelectorAll(".tab").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeTab = button.dataset.tab;
+        selectedSymbol = null;
+
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        button.classList.add("active");
+        renderCards();
+      });
+    });
+
+    document.querySelector("#search").addEventListener("input", () => {
+      selectedSymbol = null;
+      renderCards();
+    });
+
+    ["industry", "action", "minScore", "sort"].forEach((id) => {
+      document.querySelector(`#${id}`).addEventListener("change", () => {
+        selectedSymbol = null;
+        renderCards();
+      });
+    });
+
+    loadData();
+
+    setInterval(loadData, 60000);
+  </script>
 </body>
 </html>
