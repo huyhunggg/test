@@ -2,20 +2,25 @@ name: Update Stock Radar Data
 
 on:
   workflow_dispatch:
+
   schedule:
-    - cron: "*/50 * * * *"
+    # Chạy mỗi 2 giờ, phút thứ 15.
+    # GitHub Actions dùng giờ UTC.
+    - cron: "15 */2 * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: stock-radar-scan
+  group: stock-radar-update
   cancel-in-progress: false
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+
+    # Không để job chạy đến giới hạn GitHub gần 9 giờ.
+    timeout-minutes: 35
 
     steps:
       - name: Checkout repository
@@ -32,12 +37,17 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run scanner
+        env:
+          # Nếu bạn có danh sách mã trong GitHub Secret SYMBOLS,
+          # scanner sẽ ưu tiên dùng Secret đó.
+          SYMBOLS: ${{ secrets.SYMBOLS }}
         run: python scripts/scan.py
 
       - name: Commit updated data
         run: |
           git config user.name "stock-radar-bot"
           git config user.email "stock-radar-bot@users.noreply.github.com"
+
           git add data.json
           git diff --staged --quiet || git commit -m "Update stock radar data"
           git push
