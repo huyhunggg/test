@@ -1,858 +1,657 @@
 import json
+import os
 import time
+import traceback
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from vnstock.api.quote import Quote
 
 
-# =========================
-# CONFIG
-# =========================
+# =========================================================
+# CẤU HÌNH
+# =========================================================
 
-REQUEST_DELAY_SECONDS = 2.8
-RATE_LIMIT_WAIT_SECONDS = 50
-MAX_RETRIES = 1
+ROOT_DIR = Path(__file__).resolve().parent.parent
+DATA_FILE = ROOT_DIR / "data.json"
+SYMBOLS_FILE = ROOT_DIR / "symbols.txt"
 
-MAX_STALE_DAYS = 14
-MIN_AVG_VOL20 = 50000
-MIN_RECENT_VOLUME_DAYS = 5
+# Chỉ cần hơn 100 phiên để tính MA100; lấy 460 ngày lịch
+# để có đủ dữ liệu sau các ngày nghỉ/lễ mà không quá chậm.
+LOOKBACK_DAYS = 460
 
-PENNY_MAX_PRICE = 15
-PENNY_MIN_AVG_VOL20 = 100000
+# Không gọi quá nhanh để hạn chế bị rate-limit.
+REQUEST_DELAY_SECONDS = 1.2
 
+# Retry ít lần để không treo hàng giờ khi VNStock lỗi hàng loạt.
+MAX_RETRIES = 2
+RETRY_WAIT_SECONDS = 5
 
-BLACKLIST_SYMBOLS = {
-    # Mã nghi ngờ không còn giao dịch / dữ liệu không đáng tin / mã rác
-    "BBC", "XLV",
-    "X20", "X26", "X77", "XDH", "XHC", "XMC",
-    "WTC", "VTX",
+# Nếu 12 mã đầu đều fail, dừng ngay.
+# Không cố quét vài trăm mã lỗi rồi bị GitHub timeout.
+MAX_CONSECUTIVE_FAILURES = 12
 
-    # Có thể bổ sung thêm nếu bạn thấy mã nào bị lỗi dữ liệu
-    "VST", "VSM", "VSI", "VSF", "VSE", "VSA",
-    "VQC", "VPS", "VPR", "VPC", "VPA",
-    "VNX", "VNP", "VNI", "VNF", "VNB",
-    "VMS", "VMB", "VLP", "VLG", "VLA",
-    "VTJ", "VTK", "VTL", "VTM", "VTN", "VTR", "VTS",
-    "VTG", "VTH", "VTD", "VTE"
-}
+# Chỉ ghi data.json mới nếu có ít nhất số lượng kết quả này.
+# Nếu không đủ, giữ nguyên data.json cũ.
+MIN_VALID_RESULTS = 30
 
 
-BLUECHIP_SYMBOLS = {
-    # Ngân hàng
-    "VCB", "BID", "CTG", "TCB", "MBB", "ACB", "VPB", "STB", "HDB", "VIB", "TPB", "LPB", "EIB", "OCB", "SHB",
+# =========================================================
+# TIỆN ÍCH
+# =========================================================
 
-    # Bất động sản / Holding
-    "VIC", "VHM", "VRE", "BCM", "KDH", "NLG",
-
-    # Công nghệ / Bán lẻ
-    "FPT", "MWG", "PNJ", "FRT",
-
-    # Hàng hóa / Công nghiệp
-    "HPG", "GAS", "PLX", "POW", "GVR", "REE", "GEX", "DGC",
-
-    # Tiêu dùng
-    "MSN", "VNM", "SAB", "MCH", "QNS",
-
-    # Chứng khoán
-    "SSI", "HCM", "VCI", "VND", "SHS", "MBS", "FTS", "BSI",
-
-    # Logistics / Hạ tầng / Hàng không
-    "GMD", "VJC", "HVN", "ACV", "VTP",
-
-    # Khác
-    "BVH", "PVD", "PVS", "BSR"
-}
+def now_utc():
+    return datetime.utcnow().isoformat() + "Z"
 
 
-COMPANY_INFO = {
-    "ACB": {"name": "ACB", "industry": "Ngân hàng"},
-    "BID": {"name": "BIDV", "industry": "Ngân hàng"},
-    "CTG": {"name": "VietinBank", "industry": "Ngân hàng"},
-    "VCB": {"name": "Vietcombank", "industry": "Ngân hàng"},
-    "TCB": {"name": "Techcombank", "industry": "Ngân hàng"},
-    "MBB": {"name": "MB Bank", "industry": "Ngân hàng"},
-    "VPB": {"name": "VPBank", "industry": "Ngân hàng"},
-    "STB": {"name": "Sacombank", "industry": "Ngân hàng"},
-    "HDB": {"name": "HDBank", "industry": "Ngân hàng"},
-    "VIB": {"name": "VIB", "industry": "Ngân hàng"},
-    "TPB": {"name": "TPBank", "industry": "Ngân hàng"},
-    "LPB": {"name": "LPBank", "industry": "Ngân hàng"},
-    "EIB": {"name": "Eximbank", "industry": "Ngân hàng"},
-    "OCB": {"name": "OCB", "industry": "Ngân hàng"},
-    "SHB": {"name": "SHB", "industry": "Ngân hàng"},
-
-    "VIC": {"name": "Tập đoàn Vingroup", "industry": "Bất động sản / Holding"},
-    "VHM": {"name": "Vinhomes", "industry": "Bất động sản"},
-    "VRE": {"name": "Vincom Retail", "industry": "Bất động sản bán lẻ"},
-    "KDH": {"name": "Khang Điền", "industry": "Bất động sản"},
-    "NLG": {"name": "Nam Long", "industry": "Bất động sản"},
-    "DXG": {"name": "Đất Xanh", "industry": "Bất động sản"},
-    "DIG": {"name": "DIC Corp", "industry": "Bất động sản"},
-    "PDR": {"name": "Phát Đạt", "industry": "Bất động sản"},
-    "NVL": {"name": "Novaland", "industry": "Bất động sản"},
-    "CEO": {"name": "CEO Group", "industry": "Bất động sản"},
-
-    "KBC": {"name": "Kinh Bắc", "industry": "Bất động sản KCN"},
-    "IDC": {"name": "IDICO", "industry": "Bất động sản KCN"},
-    "SZC": {"name": "Sonadezi Châu Đức", "industry": "Bất động sản KCN"},
-    "BCM": {"name": "Becamex", "industry": "Bất động sản KCN"},
-    "LHG": {"name": "Long Hậu", "industry": "Bất động sản KCN"},
-    "NTC": {"name": "Nam Tân Uyên", "industry": "Bất động sản KCN"},
-
-    "FPT": {"name": "FPT Corporation", "industry": "Công nghệ"},
-    "FOX": {"name": "FPT Telecom", "industry": "Công nghệ / Viễn thông"},
-    "CMG": {"name": "CMC Corp", "industry": "Công nghệ"},
-    "ELC": {"name": "ELCOM", "industry": "Công nghệ"},
-    "CTR": {"name": "Viettel Construction", "industry": "Viễn thông / Hạ tầng"},
-
-    "MWG": {"name": "Thế Giới Di Động", "industry": "Bán lẻ"},
-    "DGW": {"name": "Digiworld", "industry": "Bán lẻ / Phân phối"},
-    "FRT": {"name": "FPT Retail", "industry": "Bán lẻ"},
-    "PNJ": {"name": "Vàng bạc Đá quý Phú Nhuận", "industry": "Bán lẻ / Trang sức"},
-
-    "HPG": {"name": "Hòa Phát", "industry": "Thép"},
-    "HSG": {"name": "Hoa Sen", "industry": "Thép"},
-    "NKG": {"name": "Nam Kim", "industry": "Thép"},
-
-    "SSI": {"name": "Chứng khoán SSI", "industry": "Chứng khoán"},
-    "HCM": {"name": "Chứng khoán HSC", "industry": "Chứng khoán"},
-    "VCI": {"name": "Chứng khoán Vietcap", "industry": "Chứng khoán"},
-    "VND": {"name": "Chứng khoán VNDirect", "industry": "Chứng khoán"},
-    "SHS": {"name": "Chứng khoán Sài Gòn Hà Nội", "industry": "Chứng khoán"},
-    "MBS": {"name": "Chứng khoán MB", "industry": "Chứng khoán"},
-    "FTS": {"name": "Chứng khoán FPT", "industry": "Chứng khoán"},
-    "BSI": {"name": "Chứng khoán BIDV", "industry": "Chứng khoán"},
-    "CTS": {"name": "Chứng khoán VietinBank", "industry": "Chứng khoán"},
-    "VIX": {"name": "Chứng khoán VIX", "industry": "Chứng khoán"},
-
-    "PVD": {"name": "PV Drilling", "industry": "Dầu khí"},
-    "PVS": {"name": "PVS", "industry": "Dầu khí"},
-    "GAS": {"name": "PV Gas", "industry": "Dầu khí"},
-    "BSR": {"name": "Lọc hóa dầu Bình Sơn", "industry": "Dầu khí"},
-    "PLX": {"name": "Petrolimex", "industry": "Dầu khí"},
-    "PVT": {"name": "PVTrans", "industry": "Dầu khí / Vận tải"},
-
-    "GEX": {"name": "Gelex", "industry": "Công nghiệp"},
-    "REE": {"name": "REE Corp", "industry": "Điện / Cơ điện lạnh"},
-    "PC1": {"name": "PC1 Group", "industry": "Xây lắp điện"},
-    "HDG": {"name": "Hà Đô", "industry": "Bất động sản / Năng lượng"},
-    "POW": {"name": "PV Power", "industry": "Điện"},
-    "NT2": {"name": "Điện Nhơn Trạch 2", "industry": "Điện"},
-    "PPC": {"name": "Nhiệt điện Phả Lại", "industry": "Điện"},
-
-    "VNM": {"name": "Vinamilk", "industry": "Thực phẩm"},
-    "MSN": {"name": "Masan", "industry": "Tiêu dùng"},
-    "SAB": {"name": "Sabeco", "industry": "Đồ uống"},
-    "MCH": {"name": "Masan Consumer", "industry": "Tiêu dùng"},
-    "QNS": {"name": "Đường Quảng Ngãi", "industry": "Thực phẩm"},
-    "DBC": {"name": "Dabaco", "industry": "Nông nghiệp / Thực phẩm"},
-    "BAF": {"name": "BAF Việt Nam", "industry": "Nông nghiệp / Thực phẩm"},
-
-    "GMD": {"name": "Gemadept", "industry": "Cảng biển / Logistics"},
-    "HAH": {"name": "Hải An", "industry": "Vận tải biển"},
-    "VSC": {"name": "Viconship", "industry": "Cảng biển"},
-    "VTP": {"name": "Viettel Post", "industry": "Logistics"},
-
-    "DGC": {"name": "Hóa chất Đức Giang", "industry": "Hóa chất"},
-    "CSV": {"name": "Hóa chất Cơ bản Miền Nam", "industry": "Hóa chất"},
-    "DDV": {"name": "DAP Vinachem", "industry": "Hóa chất"},
-    "DPM": {"name": "Đạm Phú Mỹ", "industry": "Phân bón"},
-    "DCM": {"name": "Đạm Cà Mau", "industry": "Phân bón"},
-
-    "VJC": {"name": "Vietjet Air", "industry": "Hàng không"},
-    "HVN": {"name": "Vietnam Airlines", "industry": "Hàng không"},
-    "ACV": {"name": "Cảng hàng không Việt Nam", "industry": "Hạ tầng hàng không"},
-}
-
-
-# =========================
-# LOAD SYMBOLS
-# =========================
-
-def load_symbols():
+def safe_float(value, default=0.0):
     try:
-        with open("symbols.txt", "r", encoding="utf-8") as f:
-            raw = f.read()
-    except FileNotFoundError:
-        print("symbols.txt not found. Using fallback symbols.")
-        raw = """
-        VIC,VHM,VRE,FPT,HPG,HCM,SSI,VCI,VND,BID,CTG,MBB,
-        TCB,ACB,STB,PVD,GEX,KBC,MWG,DGW,PNJ,DGC,GMD
-        """
-
-    symbols = []
-
-    for line in raw.replace(",", "\n").splitlines():
-        s = line.strip().upper()
-
-        if not s:
-            continue
-
-        if s.startswith("#"):
-            continue
-
-        if s in BLACKLIST_SYMBOLS:
-            continue
-
-        symbols.append(s)
-
-    unique_symbols = list(dict.fromkeys(symbols))
-    print(f"Loaded {len(unique_symbols)} symbols after blacklist filter.")
-    return unique_symbols
-
-
-SYMBOLS = load_symbols()
-
-
-# =========================
-# HELPERS
-# =========================
-
-def round_num(x, digits=2):
-    try:
-        if pd.isna(x):
-            return None
-        return round(float(x), digits)
-    except Exception:
-        return None
-
-
-def safe_float(x, default=0):
-    try:
-        if pd.isna(x):
+        if value is None:
             return default
-        return float(x)
+        value = str(value).replace(",", "").strip()
+        return float(value)
     except Exception:
         return default
 
 
-def pct(current, past):
-    try:
-        if past is None or past == 0 or pd.isna(past):
-            return 0
-        return ((current - past) / past) * 100
-    except Exception:
-        return 0
+def clean_symbol(symbol):
+    return str(symbol).strip().upper()
 
 
-def rsi(series, period=14):
-    delta = series.diff()
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
+def load_symbols():
+    """
+    Thứ tự ưu tiên:
+    1. GitHub Secret SYMBOLS: VCB,HPG,FPT...
+    2. symbols.txt: mỗi dòng một mã hoặc phân tách bằng dấu phẩy.
+    """
 
-    avg_gain = gain.rolling(period).mean()
-    avg_loss = loss.rolling(period).mean()
+    env_symbols = os.getenv("SYMBOLS", "").strip()
 
-    rs = avg_gain / avg_loss
-    return 100 - (100 / (1 + rs))
+    if env_symbols:
+        raw = env_symbols.replace("\n", ",").split(",")
+        symbols = [clean_symbol(x) for x in raw if clean_symbol(x)]
+        return list(dict.fromkeys(symbols))
 
+    if not SYMBOLS_FILE.exists():
+        raise FileNotFoundError(
+            "Không tìm thấy symbols.txt và GitHub Secret SYMBOLS cũng đang trống."
+        )
 
-def macd(series):
-    ema12 = series.ewm(span=12, adjust=False).mean()
-    ema26 = series.ewm(span=26, adjust=False).mean()
+    content = SYMBOLS_FILE.read_text(encoding="utf-8")
+    content = content.replace("\n", ",")
+    raw = content.split(",")
 
-    macd_line = ema12 - ema26
-    signal = macd_line.ewm(span=9, adjust=False).mean()
-    hist = macd_line - signal
+    symbols = []
+    for item in raw:
+        symbol = clean_symbol(item)
 
-    return macd_line, signal, hist
+        # Bỏ dòng comment.
+        if not symbol or symbol.startswith("#"):
+            continue
+
+        symbols.append(symbol)
+
+    return list(dict.fromkeys(symbols))
 
 
 def normalize_df(df):
+    """
+    Chuẩn hóa cột OHLCV do VNStock có thể trả về tên cột khác nhau.
+    """
+
+    if df is None or not isinstance(df, pd.DataFrame) or df.empty:
+        raise ValueError("VNStock trả về dữ liệu rỗng.")
+
     df = df.copy()
+    df.columns = [str(col).strip().lower() for col in df.columns]
 
     rename_map = {
-        "time": "time",
-        "date": "time",
-        "tradingDate": "time",
-        "trading_date": "time",
+        "time": "date",
+        "datetime": "date",
+        "tradingdate": "date",
+        "trading_date": "date",
+        "date": "date",
         "open": "open",
         "high": "high",
         "low": "low",
         "close": "close",
-        "volume": "volume"
+        "volume": "volume",
+        "match_volume": "volume",
+        "total_volume": "volume",
     }
 
-    df = df.rename(columns={c: rename_map.get(c, c) for c in df.columns})
+    df = df.rename(columns={
+        old: new for old, new in rename_map.items() if old in df.columns
+    })
 
     required = ["open", "high", "low", "close", "volume"]
 
-    for col in required:
-        if col not in df.columns:
-            raise ValueError(f"Missing column {col}. Columns: {list(df.columns)}")
+    missing = [column for column in required if column not in df.columns]
+    if missing:
+        raise ValueError(f"Thiếu cột OHLCV: {missing}. Columns: {list(df.columns)}")
 
-    for col in required:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+    if "date" in df.columns:
+        df["date"] = pd.to_datetime(df["date"], errors="coerce")
+        df = df.sort_values("date")
 
-    df = df.dropna(subset=required)
+    for column in required:
+        df[column] = pd.to_numeric(df[column], errors="coerce")
 
-    if "time" in df.columns:
-        df["time"] = pd.to_datetime(df["time"], errors="coerce")
-        df = df.dropna(subset=["time"])
-        df = df.sort_values("time")
-
-    return df.reset_index(drop=True)
-
-
-# =========================
-# FETCH DATA
-# =========================
-
-def fetch_history(symbol):
-    end = datetime.now()
-    start = end - timedelta(days=540)
-
-    q = Quote(symbol=symbol, source="VCI")
-
-    df = q.history(
-        start=start.strftime("%Y-%m-%d"),
-        end=end.strftime("%Y-%m-%d"),
-        interval="1D"
-    )
-
-    df = normalize_df(df)
+    df = df.dropna(subset=required).reset_index(drop=True)
 
     if len(df) < 120:
-        raise ValueError(f"Not enough data: {len(df)} rows")
+        raise ValueError(f"Không đủ lịch sử giá: chỉ có {len(df)} phiên.")
 
-    # Loại mã không có nến mới
-    if "time" in df.columns:
-        latest_date = df["time"].iloc[-1]
-
-        try:
-            latest_date = latest_date.tz_localize(None)
-        except Exception:
-            pass
-
-        stale_days = (pd.Timestamp.now().normalize() - latest_date.normalize()).days
-
-        if stale_days > MAX_STALE_DAYS:
-            raise ValueError(
-                f"Inactive/stale symbol. Latest candle: {latest_date.date()}, stale {stale_days} days"
-            )
-
-    # Loại mã thanh khoản quá thấp
-    avg_vol20 = df["volume"].tail(20).mean()
-    recent_volume_days = (df["volume"].tail(20) > 0).sum()
-
-    if avg_vol20 < MIN_AVG_VOL20:
-        raise ValueError(f"Low liquidity. avgVol20={avg_vol20:.0f}")
-
-    if recent_volume_days < MIN_RECENT_VOLUME_DAYS:
-        raise ValueError(f"Too few recent trading days. recentVolumeDays={recent_volume_days}")
-
-    return df.tail(260).reset_index(drop=True)
+    return df
 
 
-def is_rate_limit_error(error):
-    msg = str(error).lower()
+# =========================================================
+# LẤY DỮ LIỆU VNSTOCK
+# =========================================================
 
-    keywords = [
-        "rate limit",
-        "request limit",
-        "too many requests",
-        "maximum api request",
-        "giới hạn",
-        "20/20",
-        "wait to retry",
-        "maximum",
-        "api request limit"
-    ]
+def fetch_history_once(symbol):
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=LOOKBACK_DAYS)
 
-    return any(k in msg for k in keywords)
+    # Vẫn dùng VNStock + VCI theo đúng hệ thống hiện tại.
+    quote = Quote(symbol=symbol, source="VCI")
+
+    df = quote.history(
+        start=start_date.strftime("%Y-%m-%d"),
+        end=end_date.strftime("%Y-%m-%d"),
+        interval="1D",
+    )
+
+    return normalize_df(df)
 
 
 def fetch_history_with_retry(symbol):
+    last_error = None
+
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            return fetch_history(symbol)
+            return fetch_history_once(symbol)
 
-        except BaseException as e:
-            if is_rate_limit_error(e):
-                print(f"Rate limit at {symbol}. Wait {RATE_LIMIT_WAIT_SECONDS}s.")
-                time.sleep(RATE_LIMIT_WAIT_SECONDS)
-            else:
-                print(f"Fetch error {symbol}: {e}")
-                time.sleep(5)
+        except Exception as error:
+            last_error = error
 
-    raise RuntimeError(f"Failed to fetch {symbol}")
+            print(
+                f"  Attempt {attempt}/{MAX_RETRIES} failed for {symbol}: "
+                f"{type(error).__name__}: {error}"
+            )
+
+            if attempt < MAX_RETRIES:
+                time.sleep(RETRY_WAIT_SECONDS * attempt)
+
+    raise RuntimeError(f"Failed to fetch {symbol}: {last_error}")
 
 
-# =========================
-# SCORING
-# =========================
+# =========================================================
+# CHỈ BÁO KỸ THUẬT
+# =========================================================
+
+def calculate_rsi(close, period=14):
+    delta = close.diff()
+
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+
+    avg_gain = gain.rolling(period).mean()
+    avg_loss = loss.rolling(period).mean()
+
+    rs = avg_gain / avg_loss.replace(0, np.nan)
+    rsi = 100 - (100 / (1 + rs))
+
+    return rsi.fillna(50)
+
+
+def calculate_macd(close):
+    ema12 = close.ewm(span=12, adjust=False).mean()
+    ema26 = close.ewm(span=26, adjust=False).mean()
+
+    macd = ema12 - ema26
+    signal = macd.ewm(span=9, adjust=False).mean()
+    histogram = macd - signal
+
+    return macd, signal, histogram
+
+
+def pct_change(current, past):
+    if not past:
+        return 0.0
+    return ((current - past) / past) * 100
+
+
+# =========================================================
+# CHẤM ĐIỂM
+# =========================================================
 
 def score_stock(symbol, df):
     close = df["close"]
-    high = df["high"]
-    low = df["low"]
     volume = df["volume"]
 
-    price = close.iloc[-1]
+    current_price = safe_float(close.iloc[-1])
+    current_volume = safe_float(volume.iloc[-1])
 
-    ma20 = close.rolling(20).mean()
-    ma50 = close.rolling(50).mean()
-    ma100 = close.rolling(100).mean()
+    ma20 = safe_float(close.rolling(20).mean().iloc[-1])
+    ma50 = safe_float(close.rolling(50).mean().iloc[-1])
+    ma100 = safe_float(close.rolling(100).mean().iloc[-1])
 
-    rsi_series = rsi(close)
-    macd_line, macd_signal, macd_hist = macd(close)
+    rsi_series = calculate_rsi(close)
+    current_rsi = safe_float(rsi_series.iloc[-1])
 
-    current_ma20 = ma20.iloc[-1]
-    current_ma50 = ma50.iloc[-1]
-    current_ma100 = ma100.iloc[-1]
+    macd_series, signal_series, histogram_series = calculate_macd(close)
 
-    current_rsi = rsi_series.iloc[-1]
-    rsi_10 = rsi_series.iloc[-10] if len(rsi_series) >= 10 else np.nan
-    rsi_20 = rsi_series.iloc[-20] if len(rsi_series) >= 20 else np.nan
+    macd = safe_float(macd_series.iloc[-1])
+    macd_signal = safe_float(signal_series.iloc[-1])
+    macd_histogram = safe_float(histogram_series.iloc[-1])
 
-    current_macd = macd_line.iloc[-1]
-    current_signal = macd_signal.iloc[-1]
-    current_hist = macd_hist.iloc[-1]
+    change5 = pct_change(current_price, safe_float(close.iloc[-6]))
+    change20 = pct_change(current_price, safe_float(close.iloc[-21]))
+    change60 = pct_change(current_price, safe_float(close.iloc[-61]))
 
-    prev_macd = macd_line.iloc[-2]
-    prev_signal = macd_signal.iloc[-2]
-    prev_hist = macd_hist.iloc[-2]
+    avg_volume20 = safe_float(volume.tail(20).mean())
+    avg_volume50 = safe_float(volume.tail(50).mean())
 
-    avg_vol20 = volume.tail(20).mean()
-    avg_vol50 = volume.tail(50).mean()
-
-    volume_ratio20 = volume.iloc[-1] / avg_vol20 if avg_vol20 else 0
-    volume_ratio50 = volume.iloc[-1] / avg_vol50 if avg_vol50 else 0
-
-    high20 = high.iloc[-21:-1].max()
-    high60 = high.iloc[-61:-1].max()
-    high120 = high.iloc[-121:-1].max()
-
-    low20 = low.tail(20).min()
-    low60 = low.tail(60).min()
-    low90 = low.tail(90).min()
-
-    change5 = pct(price, close.iloc[-6]) if len(close) >= 6 else 0
-    change20 = pct(price, close.iloc[-21]) if len(close) >= 21 else 0
-    change60 = pct(price, close.iloc[-61]) if len(close) >= 61 else 0
-
-    above_ma20 = price > current_ma20
-    above_ma50 = price > current_ma50
-    above_ma100 = price > current_ma100
-
-    ma_stack_bullish = current_ma20 > current_ma50 > current_ma100
-
-    try:
-        ma_turning_up = current_ma20 > ma20.iloc[-5] and current_ma50 >= ma50.iloc[-5]
-    except Exception:
-        ma_turning_up = False
-
-    breakout20 = price > high20
-    breakout60 = price > high60
-    breakout120 = price > high120
-
-    pullback_ma20 = price > current_ma20 and low20 <= current_ma20 * 1.03
-    pullback_ma50 = price > current_ma50 and low60 <= current_ma50 * 1.04
-
-    macd_cross_up = prev_macd <= prev_signal and current_macd > current_signal
-    hist_turn_positive = prev_hist <= 0 and current_hist > 0
-    hist_improving = current_hist > prev_hist
-
-    rsi_recover50 = (
-        (not pd.isna(rsi_10) and rsi_10 < 45 and current_rsi > 50) or
-        (not pd.isna(rsi_20) and rsi_20 < 40 and current_rsi > 50)
-    )
-
-    rsi_healthy = 50 <= current_rsi <= 70
-    rsi_hot = current_rsi > 75
-
-    base_range60 = ((high60 - low60) / price) * 100 if price else 999
-    base_range90 = ((high120 - low90) / price) * 100 if price else 999
-
-    shakeout = (
-        low.tail(15).min() < current_ma50 * 0.97 and
-        price > current_ma50 and
-        current_rsi > 48
-    )
-
-    try:
-        dry_volume_before_breakout = (
-            volume.iloc[-50:-20].mean() > 0 and
-            volume.iloc[-20:-5].mean() < volume.iloc[-50:-20].mean() * 0.85 and
-            volume_ratio20 > 1.5
-        )
-    except Exception:
-        dry_volume_before_breakout = False
-
-    # Trend score /20
-    trend = 0
-    if above_ma20:
-        trend += 4
-    if above_ma50:
-        trend += 4
-    if above_ma100:
-        trend += 4
-    if ma_stack_bullish:
-        trend += 5
-    if ma_turning_up:
-        trend += 2
-    if change60 > 20:
-        trend += 1
-    trend = min(trend, 20)
-
-    # Momentum score /15
-    momentum = 0
-    if rsi_healthy:
-        momentum += 4
-    if rsi_recover50:
-        momentum += 4
-    if macd_cross_up:
-        momentum += 4
-    if hist_turn_positive:
-        momentum += 2
-    if change20 > 8:
-        momentum += 1
-    momentum = min(momentum, 15)
-
-    # Money score /20
-    money = 0
-    if volume_ratio20 > 1.2:
-        money += 3
-    if volume_ratio20 > 1.5:
-        money += 4
-    if volume_ratio20 > 2.0:
-        money += 4
-    if volume_ratio50 > 1.3:
-        money += 3
-    if change20 > 10 and volume_ratio20 > 1.2:
-        money += 4
-    if dry_volume_before_breakout:
-        money += 2
-    money = min(money, 20)
-
-    # Setup score /15
-    setup = 0
-    if breakout20:
-        setup += 4
-    if breakout60:
-        setup += 5
-    if breakout120:
-        setup += 3
-    if pullback_ma20:
-        setup += 2
-    if pullback_ma50:
-        setup += 1
-    if shakeout:
-        setup += 2
-    setup = min(setup, 15)
-
-    # VIC Leap score /15
-    vic_leap = 0
-    if base_range60 <= 35 or base_range90 <= 45:
-        vic_leap += 3
-    if breakout60:
-        vic_leap += 3
-    if breakout120:
-        vic_leap += 1
-    if volume_ratio20 >= 1.8:
-        vic_leap += 2
-    if macd_cross_up:
-        vic_leap += 2
-    if hist_turn_positive:
-        vic_leap += 1
-    if rsi_recover50:
-        vic_leap += 2
-    if above_ma20 and above_ma50 and above_ma100:
-        vic_leap += 1
-    if shakeout:
-        vic_leap += 1
-    if dry_volume_before_breakout:
-        vic_leap += 1
-    vic_leap = min(vic_leap, 15)
-
-    # Risk score /10
-    risk = 10
-    if rsi_hot:
-        risk -= 3
-    if change20 > 25:
-        risk -= 3
-    if price > current_ma20 * 1.15:
-        risk -= 2
-    if volume_ratio20 > 4:
-        risk -= 1
-    if price < current_ma50:
-        risk -= 2
-    risk = max(0, min(risk, 10))
-
-    relative_strength = 0
-
-    # T+ score /15
-    tplus = 0
-    if above_ma20:
-        tplus += 2
-    if ma_turning_up:
-        tplus += 2
-    if 50 <= current_rsi <= 70:
-        tplus += 2
-    if 0 < change5 <= 10:
-        tplus += 2
-    if 1.2 <= volume_ratio20 <= 3:
-        tplus += 2
-    if breakout20 or pullback_ma20:
-        tplus += 2
-    if current_macd > current_signal or hist_improving:
-        tplus += 2
-    if risk >= 7:
-        tplus += 1
-    tplus = min(tplus, 15)
-
-    total_score = round(
-        trend +
-        momentum +
-        money +
-        setup +
-        vic_leap +
-        risk +
-        relative_strength
-    )
-
-    is_bluechip = symbol in BLUECHIP_SYMBOLS
-
-    is_penny = (
-        price <= PENNY_MAX_PRICE and
-        avg_vol20 >= PENNY_MIN_AVG_VOL20
-    )
-
-    categories = []
-
-    if total_score >= 85:
-        categories.append("Top cơ hội")
-    if tplus >= 10:
-        categories.append("Lướt sóng T+")
-    if is_bluechip:
-        categories.append("Bluechip")
-    if is_penny:
-        categories.append("Penny")
-    if vic_leap >= 11:
-        categories.append("Bước nhảy VIC")
-    if breakout20:
-        categories.append("Breakout 20 phiên")
-    if breakout60:
-        categories.append("Breakout 60 phiên")
-    if breakout120:
-        categories.append("Breakout 120 phiên")
-    if pullback_ma20:
-        categories.append("Pullback MA20")
-    if pullback_ma50:
-        categories.append("Pullback MA50")
-    if money >= 14:
-        categories.append("Dòng tiền mạnh")
-    if macd_cross_up or hist_turn_positive:
-        categories.append("MACD đảo chiều")
-    if rsi_recover50:
-        categories.append("RSI hồi phục")
-    if base_range60 <= 35 or base_range90 <= 45:
-        categories.append("Tích lũy nền")
-    if risk >= 8 and total_score >= 75:
-        categories.append("An toàn")
-
-    categories.append("Tất cả mã")
+    volume_ratio20 = current_volume / avg_volume20 if avg_volume20 else 0
+    volume_ratio50 = current_volume / avg_volume50 if avg_volume50 else 0
 
     positives = []
     risks = []
+    categories = ["Tất cả mã"]
 
-    if tplus >= 12:
-        positives.append("Điểm T+ cao: giá trên MA20, RSI khỏe, dòng tiền cải thiện và setup ngắn hạn tốt.")
-    elif tplus >= 10:
-        positives.append("Có tín hiệu T+ tiềm năng, phù hợp theo dõi điểm mua ngắn hạn.")
+    # -----------------------------------------------------
+    # Trend: tối đa 20
+    # -----------------------------------------------------
+    trend_score = 0
 
-    if is_bluechip:
-        positives.append("Thuộc nhóm Bluechip/vốn hóa lớn, thường có thanh khoản và độ quan tâm thị trường cao.")
+    if current_price > ma20:
+        trend_score += 5
 
-    if is_penny:
-        positives.append("Thuộc nhóm Penny có thanh khoản, phù hợp theo dõi sóng ngắn nhưng cần quản trị rủi ro chặt.")
+    if current_price > ma50:
+        trend_score += 5
 
-    if above_ma20 and above_ma50 and above_ma100:
-        positives.append("Giá nằm trên MA20, MA50 và MA100, cấu trúc xu hướng tích cực.")
+    if current_price > ma100:
+        trend_score += 4
 
-    if ma_stack_bullish:
+    if ma20 > ma50 > ma100:
+        trend_score += 6
         positives.append("MA20 > MA50 > MA100, xu hướng tăng đang được xác nhận.")
 
-    if breakout20:
-        positives.append("Giá breakout đỉnh 20 phiên.")
-    if breakout60:
-        positives.append("Giá breakout đỉnh 60 phiên.")
-    if breakout120:
-        positives.append("Giá breakout đỉnh 120 phiên.")
-    if volume_ratio20 >= 1.8:
-        positives.append(f"Volume đạt {volume_ratio20:.2f} lần trung bình 20 phiên.")
-    if macd_cross_up:
-        positives.append("MACD cắt lên Signal.")
-    if hist_turn_positive:
-        positives.append("MACD Histogram chuyển từ âm sang dương.")
-    if rsi_recover50:
-        positives.append("RSI hồi từ vùng yếu và vượt lại mốc 50.")
-    if shakeout:
-        positives.append("Có dấu hiệu rũ bỏ dưới MA50 rồi kéo lại nhanh.")
-    if dry_volume_before_breakout:
-        positives.append("Có dấu hiệu volume cạn trước đó rồi bùng lên.")
-    if vic_leap >= 13:
-        positives.append("VIC Leap rất cao: tích lũy, breakout, dòng tiền và động lượng cùng xác nhận.")
-    elif vic_leap >= 11:
-        positives.append("Có nhiều đặc điểm tương đồng pha bước nhảy của VIC.")
-
-    if rsi_hot:
-        risks.append("RSI đang ở vùng nóng, hạn chế mua đuổi.")
-    if change20 > 25:
-        risks.append("Giá đã tăng mạnh trong 20 phiên, rủi ro rung lắc cao.")
-    if price > current_ma20 * 1.15:
-        risks.append("Giá cách xa MA20, nên chờ kiểm định hoặc rung lắc.")
-    if price < current_ma50:
+    elif current_price < ma50:
         risks.append("Giá vẫn dưới MA50, xu hướng trung hạn chưa xác nhận.")
-    if is_penny:
-        risks.append("Penny thường biến động mạnh, chỉ nên dùng tỷ trọng nhỏ và có điểm cắt lỗ rõ.")
 
-    if not risks:
-        risks.append("Chưa có rủi ro kỹ thuật lớn, nhưng vẫn cần quản trị điểm cắt lỗ.")
+    # -----------------------------------------------------
+    # Momentum: tối đa 15
+    # -----------------------------------------------------
+    momentum_score = 0
 
-    action = "THEO DÕI"
+    if change5 > 0:
+        momentum_score += 3
 
-    if rsi_hot or price > current_ma20 * 1.15:
-        action = "TRÁNH MUA ĐUỔI"
-    elif tplus >= 12 and total_score >= 75 and risk >= 7:
-        action = "MUA TỪNG PHẦN"
-    elif total_score >= 88 and risk >= 7 and vic_leap >= 10:
-        action = "MUA TỪNG PHẦN"
-    elif tplus >= 10 and risk >= 6:
-        action = "CHỜ ĐIỂM MUA"
-    elif total_score >= 80 and risk >= 6:
-        action = "CHỜ ĐIỂM MUA"
+    if change20 > 0:
+        momentum_score += 4
 
+    if change60 > 0:
+        momentum_score += 3
+
+    if 48 <= current_rsi <= 68:
+        momentum_score += 5
+        positives.append("RSI nằm trong vùng khỏe, chưa quá nóng.")
+
+    elif current_rsi >= 72:
+        risks.append(f"RSI cao ({current_rsi:.2f}), rủi ro mua đuổi.")
+
+    elif current_rsi <= 35:
+        risks.append(f"RSI thấp ({current_rsi:.2f}), xu hướng giá còn yếu.")
+
+    # -----------------------------------------------------
+    # Money: tối đa 20
+    # -----------------------------------------------------
+    money_score = 0
+
+    if volume_ratio20 >= 1.2:
+        money_score += 7
+
+    if volume_ratio20 >= 1.8:
+        money_score += 5
+
+    if volume_ratio50 >= 1.2:
+        money_score += 4
+
+    if current_price > ma20 and volume_ratio20 >= 1.2:
+        money_score += 4
+        positives.append("Dòng tiền cải thiện, thanh khoản cao hơn trung bình.")
+
+    # -----------------------------------------------------
+    # Setup: tối đa 15
+    # -----------------------------------------------------
+    setup_score = 0
     setup_name = "Theo dõi"
 
-    if vic_leap >= 13:
-        setup_name = "Bước nhảy mạnh giống VIC"
-    elif vic_leap >= 11:
-        setup_name = "Bước nhảy tiềm năng"
-    elif tplus >= 12:
-        setup_name = "Lướt sóng T+"
-    elif tplus >= 10:
-        setup_name = "T+ tiềm năng"
-    elif breakout120:
-        setup_name = "Breakout 120 phiên"
-    elif breakout60:
-        setup_name = "Breakout 60 phiên"
-    elif breakout20:
-        setup_name = "Breakout 20 phiên"
-    elif pullback_ma20:
-        setup_name = "Pullback MA20"
-    elif pullback_ma50:
-        setup_name = "Pullback MA50"
-    elif base_range60 <= 35:
-        setup_name = "Tích lũy nền"
+    distance_ma20 = ((current_price - ma20) / ma20) * 100 if ma20 else 0
 
-    info = COMPANY_INFO.get(symbol, {})
+    if current_price >= ma20 and distance_ma20 <= 5:
+        setup_score += 6
+        setup_name = "Pullback MA20"
+        categories.append("Pullback MA20")
+
+    if current_price >= ma50 and abs(current_price - ma50) / ma50 <= 0.05:
+        setup_score += 4
+        setup_name = "Pullback MA50"
+        categories.append("Pullback MA50")
+
+    high20 = safe_float(df["high"].tail(20).max())
+
+    if current_price >= high20 * 0.985 and volume_ratio20 >= 1.2:
+        setup_score += 5
+        setup_name = "Breakout 20 phiên"
+        categories.append("Breakout 20 phiên")
+
+    high60 = safe_float(df["high"].tail(60).max())
+
+    if current_price >= high60 * 0.985 and volume_ratio20 >= 1.2:
+        categories.append("Breakout 60 phiên")
+
+    high120 = safe_float(df["high"].tail(120).max())
+
+    if current_price >= high120 * 0.985 and volume_ratio20 >= 1.2:
+        categories.append("Breakout 120 phiên")
+
+    # -----------------------------------------------------
+    # VIC Leap: tối đa 15
+    # -----------------------------------------------------
+    vic_leap_score = 0
+
+    if current_price > ma20:
+        vic_leap_score += 3
+
+    if macd_histogram > 0:
+        vic_leap_score += 3
+
+    if macd > macd_signal:
+        vic_leap_score += 3
+
+    if volume_ratio20 >= 1.3:
+        vic_leap_score += 3
+
+    if 45 <= current_rsi <= 70:
+        vic_leap_score += 3
+
+    if vic_leap_score >= 8:
+        categories.append("Bước nhảy VIC")
+
+    # -----------------------------------------------------
+    # T+: tối đa 15
+    # -----------------------------------------------------
+    tplus_score = 0
+
+    if current_price > ma20:
+        tplus_score += 3
+
+    if 47 <= current_rsi <= 68:
+        tplus_score += 3
+
+    if volume_ratio20 >= 1.1:
+        tplus_score += 3
+
+    if macd_histogram >= 0:
+        tplus_score += 3
+
+    if -3 <= distance_ma20 <= 7:
+        tplus_score += 3
+
+    if tplus_score >= 9:
+        categories.append("Lướt sóng T+")
+
+        positives.append(
+            "Điểm T+ tốt: giá gần MA20, RSI phù hợp, "
+            "dòng tiền hoặc MACD có cải thiện."
+        )
+
+    # -----------------------------------------------------
+    # Risk: tối đa 15
+    # Điểm cao = rủi ro thấp
+    # -----------------------------------------------------
+    risk_score = 15
+
+    if current_rsi >= 72:
+        risk_score -= 4
+
+    if distance_ma20 > 10:
+        risk_score -= 4
+        risks.append(f"Giá đang cao hơn MA20 khoảng {distance_ma20:.2f}%.")
+
+    if change20 > 25:
+        risk_score -= 3
+        risks.append("Giá đã tăng mạnh trong 20 phiên gần đây.")
+
+    if current_price < ma50:
+        risk_score -= 2
+
+    if volume_ratio20 < 0.7:
+        risk_score -= 2
+        risks.append("Thanh khoản hiện tại thấp hơn trung bình 20 phiên.")
+
+    risk_score = max(0, risk_score)
+
+    # -----------------------------------------------------
+    # Nhóm Bluechip / Penny đơn giản theo giá.
+    # Có thể tùy chỉnh sau.
+    # -----------------------------------------------------
+    if current_price >= 30:
+        categories.append("Bluechip")
+
+    if current_price <= 20:
+        categories.append("Penny")
+
+    if volume_ratio20 >= 1.5:
+        categories.append("Dòng tiền mạnh")
+
+    if macd_histogram > 0 and macd > macd_signal:
+        categories.append("MACD đảo chiều")
+
+    if 45 <= current_rsi <= 55 and macd_histogram >= 0:
+        categories.append("RSI hồi phục")
+
+    # -----------------------------------------------------
+    # Tổng điểm và hành động
+    # -----------------------------------------------------
+    total_score = (
+        trend_score
+        + momentum_score
+        + money_score
+        + setup_score
+        + vic_leap_score
+        + tplus_score
+        + risk_score
+    )
+
+    total_score = min(100, int(round(total_score)))
+
+    if current_rsi >= 75 or distance_ma20 > 12 or change20 > 30:
+        action = "TRÁNH MUA ĐUỔI"
+
+    elif (
+        tplus_score >= 11
+        and 47 <= current_rsi <= 68
+        and -3 <= distance_ma20 <= 6
+        and volume_ratio20 >= 1.1
+    ):
+        action = "MUA TỪNG PHẦN"
+
+    elif tplus_score >= 8:
+        action = "CHỜ ĐIỂM MUA"
+
+    else:
+        action = "THEO DÕI"
+
+    market_state = "Uptrend" if ma20 > ma50 else "Chưa xác nhận"
 
     return {
         "symbol": symbol,
-        "name": info.get("name", symbol),
-        "industry": info.get("industry", "Chưa phân ngành"),
+        "name": symbol,
+        "industry": "Chưa phân ngành",
 
-        "price": round_num(price),
-        "volume": safe_float(volume.iloc[-1]),
+        "price": round(current_price, 2),
+        "volume": round(current_volume, 2),
 
-        "rsi": round_num(current_rsi),
-        "macd": round_num(current_macd, 4),
-        "macdSignal": round_num(current_signal, 4),
-        "macdHistogram": round_num(current_hist, 4),
+        "rsi": round(current_rsi, 2),
+        "macd": round(macd, 4),
+        "macdSignal": round(macd_signal, 4),
+        "macdHistogram": round(macd_histogram, 4),
 
-        "ma20": round_num(current_ma20),
-        "ma50": round_num(current_ma50),
-        "ma100": round_num(current_ma100),
+        "ma20": round(ma20, 2),
+        "ma50": round(ma50, 2),
+        "ma100": round(ma100, 2),
 
-        "change5": round_num(change5),
-        "change20": round_num(change20),
-        "change60": round_num(change60),
+        "change5": round(change5, 2),
+        "change20": round(change20, 2),
+        "change60": round(change60, 2),
 
-        "volumeRatio20": round_num(volume_ratio20),
-        "volumeRatio50": round_num(volume_ratio50),
-
-        "rs20": 0,
-        "rs60": 0,
+        "volumeRatio20": round(volume_ratio20, 2),
+        "volumeRatio50": round(volume_ratio50, 2),
 
         "score": total_score,
-        "tplusScore": tplus,
+        "tplusScore": int(tplus_score),
+
         "action": action,
         "setup": setup_name,
-        "marketState": "Uptrend mạnh" if trend >= 16 else "Uptrend" if trend >= 12 else "Chưa xác nhận",
+        "marketState": market_state,
 
         "scoreParts": {
-            "trend": trend,
-            "momentum": momentum,
-            "money": money,
-            "setup": setup,
-            "vicLeap": vic_leap,
-            "tplus": tplus,
-            "risk": risk,
-            "relativeStrength": relative_strength
+            "trend": int(trend_score),
+            "momentum": int(momentum_score),
+            "money": int(money_score),
+            "setup": int(setup_score),
+            "vicLeap": int(vic_leap_score),
+            "tplus": int(tplus_score),
+            "risk": int(risk_score),
+            "relativeStrength": 0,
         },
 
-        "categories": categories,
+        "categories": list(dict.fromkeys(categories)),
         "positives": positives,
-        "risks": risks
+        "risks": risks,
+        "priceTime": now_utc(),
     }
 
 
-# =========================
-# SAVE + MAIN
-# =========================
+# =========================================================
+# LƯU FILE AN TOÀN
+# =========================================================
 
-def save_results(results):
-    results = sorted(results, key=lambda x: x.get("score", 0), reverse=True)
+def save_results_safely(results):
+    """
+    Chỉ ghi đè khi đủ dữ liệu hợp lệ.
+    Ghi qua file .tmp trước để tránh data.json hỏng giữa chừng.
+    """
+
+    if len(results) < MIN_VALID_RESULTS:
+        print(
+            f"NOT SAVING: only {len(results)} valid results. "
+            "Existing data.json is kept unchanged."
+        )
+        return False
+
+    results = sorted(
+        results,
+        key=lambda item: item.get("score", 0),
+        reverse=True,
+    )
 
     output = {
-        "updatedAt": datetime.utcnow().isoformat() + "Z",
+        "updatedAt": now_utc(),
         "count": len(results),
-        "data": results
+        "data": results,
     }
 
-    with open("data.json", "w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
+    temp_file = DATA_FILE.with_suffix(".json.tmp")
 
+    with open(temp_file, "w", encoding="utf-8") as file:
+        json.dump(output, file, ensure_ascii=False, indent=2)
+
+    temp_file.replace(DATA_FILE)
+
+    print(f"SAVED: {len(results)} stocks to {DATA_FILE}")
+    return True
+
+
+# =========================================================
+# MAIN
+# =========================================================
 
 def main():
-    print("Start scanning market with vnstock Python package...")
-    print(f"Total symbols: {len(SYMBOLS)}")
-    print(f"Delay per request: {REQUEST_DELAY_SECONDS}s")
+    symbols = load_symbols()
+
+    if not symbols:
+        raise RuntimeError("Danh sách symbols trống.")
+
+    print("==============================================")
+    print("VN Stock Radar Scanner")
+    print("Data source: VNStock / VCI")
+    print(f"Total symbols: {len(symbols)}")
+    print(f"Lookback: {LOOKBACK_DAYS} days")
+    print("==============================================")
 
     results = []
+    consecutive_failures = 0
 
-    for idx, symbol in enumerate(SYMBOLS, start=1):
+    for index, symbol in enumerate(symbols, start=1):
+        print(f"[{index}/{len(symbols)}] Scanning {symbol}...")
+
         try:
-            print(f"[{idx}/{len(SYMBOLS)}] Scanning {symbol}...")
+            dataframe = fetch_history_with_retry(symbol)
+            scored = score_stock(symbol, dataframe)
 
-            df = fetch_history_with_retry(symbol)
-            scored = score_stock(symbol, df)
+            results.append(scored)
+            consecutive_failures = 0
 
-            if scored:
-                results.append(scored)
-                print(
-                    f"OK {symbol}: score={scored.get('score')} "
-                    f"T+={scored.get('tplusScore')} "
-                    f"setup={scored.get('setup')}"
+            print(
+                f"  OK {symbol} | "
+                f"score={scored['score']} | "
+                f"T+={scored['tplusScore']} | "
+                f"action={scored['action']}"
+            )
+
+        except Exception as error:
+            consecutive_failures += 1
+
+            print(f"  SKIP {symbol}: {type(error).__name__}: {error}")
+
+            if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
+                raise RuntimeError(
+                    f"VNStock failed {consecutive_failures} symbols continuously. "
+                    "Stop early; existing data.json will not be overwritten."
                 )
 
-            if idx % 10 == 0:
-                save_results(results)
-                print(f"Checkpoint saved: {len(results)} stocks")
+        # Chỉ checkpoint nếu đã có đủ dữ liệu để file có ý nghĩa.
+        if index % 25 == 0 and len(results) >= MIN_VALID_RESULTS:
+            print(f"Checkpoint at {index}: {len(results)} valid stocks")
+            save_results_safely(results)
 
-            time.sleep(REQUEST_DELAY_SECONDS)
+        time.sleep(REQUEST_DELAY_SECONDS)
 
-        except BaseException as e:
-            print(f"Skip {symbol}. Error: {e}")
-            time.sleep(REQUEST_DELAY_SECONDS)
-            continue
+    if not save_results_safely(results):
+        raise RuntimeError(
+            "Scan completed but valid results are too few. "
+            "Existing data.json was preserved."
+        )
 
-    save_results(results)
-    print(f"Done. Wrote {len(results)} stocks to data.json")
+    print("Scanner completed successfully.")
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+
+    except Exception as error:
+        print("\nFATAL ERROR:")
+        print(error)
+        traceback.print_exc()
+
+        # Exit code 1 để GitHub Actions báo fail,
+        # nhưng data.json cũ vẫn còn nguyên.
+        raise
