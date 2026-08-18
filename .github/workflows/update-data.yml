@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Chạy mỗi 2 giờ, phút thứ 15.
-    # GitHub Actions dùng giờ UTC.
-    - cron: "15 */2 * * *"
+    # Chạy mỗi 3 giờ, phút thứ 15.
+    # Không chạy quá dày để hạn chế bị VNStock giới hạn request.
+    - cron: "15 */3 * * *"
 
 permissions:
   contents: write
@@ -19,8 +19,8 @@ jobs:
   update-data:
     runs-on: ubuntu-latest
 
-    # Không để job chạy đến giới hạn GitHub gần 9 giờ.
-    timeout-minutes: 35
+    # Guest quét vài trăm mã có thể mất khoảng 25–35 phút.
+    timeout-minutes: 50
 
     steps:
       - name: Checkout repository
@@ -38,9 +38,10 @@ jobs:
 
       - name: Run scanner
         env:
-          # Nếu bạn có danh sách mã trong GitHub Secret SYMBOLS,
-          # scanner sẽ ưu tiên dùng Secret đó.
-          SYMBOLS: ${{ secrets.SYMBOLS }}
+          # Secret này được truyền vào nếu bạn đã tạo trên GitHub.
+          # Nếu chưa dùng được key, scanner vẫn chạy chế độ Guest,
+          # nhưng sẽ tự giới hạn tốc độ dưới 20 request/phút.
+          VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
         run: python scripts/scan.py
 
       - name: Commit updated data
